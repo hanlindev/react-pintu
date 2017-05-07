@@ -1,6 +1,10 @@
 import * as React from 'react';
+import * as Radium from 'radium';
+import * as color from 'tinycolor2';
 import {ThemeableComponent} from './ThemeableComponent';
 import {safe} from '../../lib/utils';
+
+type UseType = 'default' | 'confirm' | 'danger';
 
 export interface IButtonProps {
   label?: React.ReactNode;
@@ -8,7 +12,7 @@ export interface IButtonProps {
   use?: 'default' | 'confirm' | 'danger';
 }
 
-export class Button extends ThemeableComponent<IButtonProps, void> {
+class _Button extends ThemeableComponent<IButtonProps, void> {
   static defaultProps = {
     use: 'default',
   };
@@ -20,22 +24,36 @@ export class Button extends ThemeableComponent<IButtonProps, void> {
   private getStyles() {
     const {use} = this.props;
     const {theme} = this.context;
-    console.log(this.context);//fd
-    // TODO use radium to handle pseudo-selectors (eg. :hover)
-    switch (use) {
-      case 'default':
-        return {
-          color: theme.color.accent,
-        };
-      case 'confirm':
-        return {
-          color: theme.color.primary,
-        }
-      case 'danger':
-        return {
-          color: theme.color.danger,
-        }
+
+    const colorTheme = {
+      confirm: {
+        backgroundColor: theme.color.primary,
+      },
+      danger: {
+        backgroundColor: theme.color.danger,
+      },
+      default: {
+        color: 'white',
+        backgroundColor: theme.color.accent,
+      },
+    }[use as UseType];
+
+    const {
+      backgroundColor
+    } = colorTheme;
+    const result = {
+      ...colorTheme,
+      border: 'none',
+      outline: 'none',
+      padding: '4px 8px 4px 8px',
+      ':hover': {
+        backgroundColor: color(backgroundColor as string).darken(5),
+      },
+      ':active': {
+        backgroundColor: color(backgroundColor as string).darken(10),
+      }
     }
+    return result;
   }
 
   render() {
@@ -51,3 +69,5 @@ export class Button extends ThemeableComponent<IButtonProps, void> {
     );
   }
 }
+
+export const Button = Radium(_Button);

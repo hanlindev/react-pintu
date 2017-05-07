@@ -6,7 +6,7 @@ import {Router, Route} from 'react-router';
 
 import {history, store} from '../lib/History';
 import {ViewRegistry} from '../lib/ViewRegistry';
-import {ITheme, IThemeContext} from './ui/ThemeableComponent';
+import {ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
 
 export interface IPintuProviderProps {
   appWrapper?: React.StatelessComponent<any>;
@@ -27,13 +27,20 @@ const DEFAULT_CONTEXT: IThemeContext = {
 }
 
 export class PintuProvider extends React.Component<IPintuProviderProps, void> {
+  static childContextTypes = ThemeContextProps;
+  
   static defaultProps = {
     appWrapper: (props: any) => <div>props.children</div>,
     builderUrlPrefix: '/builder',
+    theme: {},
   };
 
   constructor(props: IPintuProviderProps) {
-    super(props, {theme: _.merge({...DEFAULT_CONTEXT}, {theme: props.theme})});
+    super(props);
+  }
+
+  getChildContext() {
+    return _.merge({...DEFAULT_CONTEXT}, {theme: this.props.theme});
   }
 
   render() {

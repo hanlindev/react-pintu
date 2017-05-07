@@ -13,19 +13,12 @@ function App(props: any) {
   );
 }
 
-const theme: IThemeCustomization = {
-  color: {
-    accent: 'yellow',
-  },
-};
-
 class PintuSample extends React.Component<{}, void> {
   render() {
     return (
       <PintuProvider
         builderUrlPrefix="/builder"
         appWrapper={App}
-        theme={theme}
         viewRegistry={registry}
       />
     );
