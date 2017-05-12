@@ -1,24 +1,17 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {AppWrapper} from './AppWrapper';
+import {IThemeCustomization} from '../components/ui';
 import {PintuProvider} from '../.';
 import {registry} from './views';
-import {IThemeCustomization} from '../components/ui';
 
-function App(props: any) {
-  return (
-    <div>
-      Sample:
-      {props.children}
-    </div>
-  );
-}
 
 class PintuSample extends React.Component<{}, void> {
   render() {
     return (
       <PintuProvider
         builderUrlPrefix="/builder"
-        appWrapper={App}
+        appWrapper={AppWrapper}
         viewRegistry={registry}
       />
     );

@@ -1,19 +1,22 @@
 import * as React from 'react';
 import * as Radium from 'radium';
-import * as color from 'tinycolor2';
+import * as tinycolor from 'tinycolor2';
 import {ThemeableComponent} from './ThemeableComponent';
 import {safe} from '../../lib/utils';
 
 type UseType = 'default' | 'confirm' | 'danger';
+type SizeType = 'small' | 'medium' | 'large';
 
 export interface IButtonProps {
   label?: React.ReactNode;
   onClick?: (e: React.MouseEvent<any>) => any;
-  use?: 'default' | 'confirm' | 'danger';
+  size?: SizeType;
+  use?: UseType;
 }
 
 class _Button extends ThemeableComponent<IButtonProps, void> {
   static defaultProps = {
+    size: 'medium',
     use: 'default',
   };
 
@@ -22,35 +25,60 @@ class _Button extends ThemeableComponent<IButtonProps, void> {
   }
 
   private getStyles() {
-    const {use} = this.props;
-    const {theme} = this.context;
+    const {size, use} = this.props;
+    const {
+      theme: {
+        color, 
+        spacing, 
+        fontSize,
+      },
+    } = this.context;
 
     const colorTheme = {
       confirm: {
-        backgroundColor: theme.color.primary,
+        color: 'white',
+        backgroundColor: color.light,
       },
       danger: {
-        backgroundColor: theme.color.danger,
+        color: 'white',
+        backgroundColor: color.danger,
       },
       default: {
         color: 'white',
-        backgroundColor: theme.color.accent,
+        backgroundColor: color.normal,
       },
     }[use as UseType];
+
+    const sizeTheme = {
+      small: {
+        fontSize: fontSize.small,
+        padding: `${spacing.tiny}px ${spacing.medium}px`,
+      },
+      medium: {
+        fontSize: fontSize.medium,
+        padding: `${spacing.tiny}px ${spacing.medium}px`,
+      },
+      large: {
+        fontSize: fontSize.large,
+        padding: `${spacing.small}px ${spacing.large}px`,
+      },
+    }[size as SizeType];
 
     const {
       backgroundColor
     } = colorTheme;
     const result = {
       ...colorTheme,
+      cursor: 'pointer',
       border: 'none',
+      borderRadius: 2,
       outline: 'none',
-      padding: '4px 8px 4px 8px',
+      ...sizeTheme,
       ':hover': {
-        backgroundColor: color(backgroundColor as string).darken(5),
+        backgroundColor: tinycolor(backgroundColor as string).darken(10),
       },
       ':active': {
-        backgroundColor: color(backgroundColor as string).darken(10),
+        backgroundColor: tinycolor(backgroundColor as string).darken(20),
       }
     }
     return result;

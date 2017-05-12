@@ -10,8 +10,14 @@ export function SampleView(props: IProps): React.ReactElement<any> {
   return (
     <div>
       TODO
-      <Button>
+      <Button use="confirm" size="small">
         Confirm
+      </Button>
+      <Button use="default" size="medium">
+        Default
+      </Button>
+      <Button use="danger" size="large">
+        Danger
       </Button>
     </div>
   );

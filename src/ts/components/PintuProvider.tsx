@@ -6,7 +6,7 @@ import {Router, Route} from 'react-router';
 
 import {history, store} from '../lib/History';
 import {ViewRegistry} from '../lib/ViewRegistry';
-import {ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
+import {getDefaultTheme, ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
 
 export interface IPintuProviderProps {
   appWrapper?: React.StatelessComponent<any>;
@@ -17,13 +17,7 @@ export interface IPintuProviderProps {
 
 // Dummy themes, fill in the correct values.
 const DEFAULT_CONTEXT: IThemeContext = {
-  theme: {
-    color: {
-      primary: 'blue',
-      accent: 'gray',
-      danger: 'read',
-    },
-  },
+  theme: getDefaultTheme(),
 }
 
 export class PintuProvider extends React.Component<IPintuProviderProps, void> {
