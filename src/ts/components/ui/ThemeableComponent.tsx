@@ -21,7 +21,7 @@ export interface ITheme {
     small?: number;
     medium?: number;
     large?: number;
-  }
+  },
 }
 
 export type IThemeCustomization = Pick<ITheme, keyof(ITheme)>;
@@ -74,7 +74,7 @@ export function getDefaultTheme(): ITheme {
       small: 8,
       medium: 13,
       large: 20,
-    }
+    },
   };
 }
 
@@ -88,7 +88,7 @@ export class ThemeableComponent<TP, TS> extends React.Component<TP, TS> {
   }
 }
 
-export function makeThemeable<TP>(component: React.StatelessComponent<TP>) {
+export function makeThemeable<TP>(component: React.ComponentClass<TP>) {
   component.contextTypes = ThemeContextProps;
   return component;
 }

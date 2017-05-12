@@ -10,6 +10,8 @@ function getNavbarStyle(theme: ITheme): React.CSSProperties {
   return {
     alignItems: 'center',
     backgroundColor: theme.color.normal,
+    boxShadow: '0 0 4px rgba(0,0,0,.14), 0 4px 8px rgba(0,0,0,.28)',
+    boxSizing: 'border-box',
     color: 'white',
     display: 'flex',
     flexFlow: 'row',
@@ -23,7 +25,7 @@ function getNavbarStyle(theme: ITheme): React.CSSProperties {
 
 function getContentStyle(): React.CSSProperties {
   return {
-    marginTop: navheight,
+    marginTop: navheight + 7, // to offset the bottom shadow
   };
 }
 

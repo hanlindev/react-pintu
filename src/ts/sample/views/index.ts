@@ -1,16 +1,16 @@
 import * as React from 'react';
 
-import {ViewRegistry} from '../../lib/ViewRegistry';
+import {ContainerRegistry, IContainerSpec} from '../../lib/ContainerRegistry';
 import {SampleView} from './SampleView';
 
-const registry = new ViewRegistry();
+const registry = new ContainerRegistry();
 
-const views: Array<[string, string, React.StatelessComponent<any>]> = [
-  ['Sample', '/sample', SampleView]
+const containers: Array<IContainerSpec> = [
+  SampleView.container,
 ];
 
-views.forEach((view) => {
-  registry.register(view[0], view[1], view[2]);
+containers.forEach((container) => {
+  registry.register(container);
 });
 
 export {

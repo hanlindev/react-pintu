@@ -6,11 +6,11 @@ const RunnerRecord = Immutable.Record({
   step: null,
 });
 
-interface IStep {
+export interface IStep {
 
 }
 
-class RunnerState extends RunnerRecord {
+export class RunnerState extends RunnerRecord {
   query: any;
   snowball: any;
   step: IStep | null;
