@@ -8,9 +8,11 @@ type UseType = 'default' | 'confirm' | 'danger';
 type SizeType = 'small' | 'medium' | 'large';
 
 export interface IButtonProps {
+  className?: string;
   label?: React.ReactNode;
   onClick?: (e: React.MouseEvent<any>) => any;
   size?: SizeType;
+  style?: React.CSSProperties;
   use?: UseType;
 }
 
@@ -85,12 +87,22 @@ class _Button extends ThemeableComponent<IButtonProps, void> {
   }
 
   render() {
-    const {label, children, onClick} = this.props;
+    const {
+      children, 
+      className,
+      label,
+      onClick,
+      style,
+    } = this.props;
 
     return (
       <button
+        className={className}
         onClick={onClick} 
-        style={this.getStyles()}
+        style={{
+          ...this.getStyles(),
+          ...style,
+        }}
       >
         {label || children}
       </button>

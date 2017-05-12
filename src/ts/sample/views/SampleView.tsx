@@ -15,16 +15,20 @@ export class SampleView extends React.Component<IProps, void> {
   };
 
   render() {
+    const style: React.CSSProperties = {
+      marginLeft: 8,
+    };
+
     return (
       <div>
         TODO
-        <Button use="confirm" size="small">
+        <Button style={style} use="confirm">
           Confirm
         </Button>
-        <Button use="default" size="medium">
+        <Button style={style} use="default">
           Default
         </Button>
-        <Button use="danger" size="large">
+        <Button style={style} use="danger">
           Danger
         </Button>
       </div>

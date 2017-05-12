@@ -88,7 +88,7 @@ export class ThemeableComponent<TP, TS> extends React.Component<TP, TS> {
   }
 }
 
-export function makeThemeable<TP>(component: React.ComponentClass<TP>) {
+export function makeThemeable<TP>(component: React.StatelessComponent<TP>) {
   component.contextTypes = ThemeContextProps;
   return component;
 }
