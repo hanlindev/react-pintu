@@ -5,6 +5,7 @@ import {Provider} from 'react-redux'
 import {Router, Route} from 'react-router';
 
 import {createRunner} from './runner';
+import {PintuBuilder} from './builder/PintuBuilder';
 import {history, store} from '../lib/History';
 import {ContainerRegistry} from '../lib/ContainerRegistry';
 import {getDefaultTheme, ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
@@ -16,7 +17,6 @@ export interface IPintuProviderProps {
   viewRegistry: ContainerRegistry;
 }
 
-// Dummy themes, fill in the correct values.
 const DEFAULT_CONTEXT: IThemeContext = {
   theme: getDefaultTheme(),
 }
@@ -59,6 +59,7 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
             <Route component={appWrapper}>
               {routes}
               {children}
+              <Route path={builderUrlPrefix} component={PintuBuilder} />
             </Route>
           </div>
         </Router>

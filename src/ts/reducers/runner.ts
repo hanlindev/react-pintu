@@ -55,7 +55,7 @@ export function runner(state: RunnerState, action: RunnerActionType) {
   return state;
 }
 
-export const runnerActions = {
+export const actions = {
   setQuery(query: any): RunnerActionType {
     return {
       type: SET_QUERY,

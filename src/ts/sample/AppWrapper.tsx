@@ -6,6 +6,14 @@ import {Icon} from './ui';
 
 const navheight = 40;
 
+function getRootStyle(): React.CSSProperties {
+  return {
+    boxSizing: 'border-box',
+    height: '100%',
+    paddingTop: navheight,
+  };
+}
+
 function getNavbarStyle(theme: ITheme): React.CSSProperties {
   return {
     alignItems: 'center',
@@ -25,7 +33,7 @@ function getNavbarStyle(theme: ITheme): React.CSSProperties {
 
 function getContentStyle(): React.CSSProperties {
   return {
-    marginTop: navheight + 7, // to offset the bottom shadow
+    height: '100%',
   };
 }
 
@@ -33,13 +41,14 @@ function _AppWrapper(props: any, context: IThemeContext) {
   const {theme} = context;
   return (
     <MuiThemeProvider>
-      <div>
+      <div style={getRootStyle()}>
         <div style={getNavbarStyle(theme)}>
           <div
             style={{
               alignItems: 'center',
               display: 'flex',
               flex: '0 0 auto',
+              userSelect: 'none',
             }}
           >
             <Icon style={{marginRight: 8}}>view_compact</Icon>
@@ -55,6 +64,7 @@ function _AppWrapper(props: any, context: IThemeContext) {
           >
           </div>
         </div>
+
         <div style={getContentStyle()}>
           {props.children}
         </div>
