@@ -1,11 +1,14 @@
 import * as _ from 'lodash';
 import {StatelessComponent} from 'react';
+import {IInputsDeclaration, IActionsDeclaration} from './interfaces';
 
 import {safe} from './utils';
 
 export interface IContainerSpec {
   name: string;
   component?: React.ComponentClass<any>;
+  inputs: IInputsDeclaration;
+  actions: IActionsDeclaration;
   pathTemplate: string;
 }
 
@@ -44,6 +47,10 @@ export class ContainerRegistry {
     this.registeredPaths[pathTemplate] = name;
     this.containers[name] = container;
     return container;
+  }
+
+  getContainer(name: string): IContainerSpec {
+    return this.containers[name];
   }
 
   static combineRegistries(...registries: Array<ContainerRegistry>): ContainerRegistry {

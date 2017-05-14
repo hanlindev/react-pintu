@@ -4,6 +4,7 @@ import {AppWrapper} from './AppWrapper';
 import {IThemeCustomization} from '../components/ui';
 import {PintuProvider} from '../.';
 import {registry} from './views';
+import * as SampleServerAPI from './SampleServerAPI';
 
 
 class PintuSample extends React.Component<{}, void> {
@@ -11,8 +12,10 @@ class PintuSample extends React.Component<{}, void> {
     return (
       <PintuProvider
         builderUrlPrefix="/builder"
+        canUseBuilder={true}
         appWrapper={AppWrapper}
-        viewRegistry={registry}
+        containerRegistry={registry}
+        builderEventHandlers={SampleServerAPI}
       />
     );
   }

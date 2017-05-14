@@ -5,20 +5,29 @@ import * as SRD from 'storm-react-diagrams';
 import {DiagramWidget} from 'storm-react-diagrams';
 
 import {IState} from '../../reducers';
-import {IStepConfig} from '../../reducers/builder';
+import {ContainerRegistry, DiagramEngine, IStepConfig, IFlowMetaData} from '../../lib';
+import {push} from 'react-router-redux';
 
 import 'storm-react-diagrams/src/sass.scss';
 import '../../../scss/builder/main.scss';
 
+interface IParams {
+  flowID?: string;
+}
+
 export interface IPintuBuilderProps {
+  dispatch: (action: any) => any;
   steps: {[key: string]: IStepConfig};
+  onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
+  onLoadFlow: (flowID: string) => Promise<IFlow>;
+  params: IParams;
 }
 
 interface IPintuBuilderState {
   isMovingCanvas: boolean;
 }
 
-class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderState> {
+class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderState> {
   protected activeModel: SRD.DiagramModel;
   protected diagramEngine: SRD.DiagramEngine;
 
@@ -31,6 +40,24 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
     this.state = {
       isMovingCanvas: false,
     };
+  }
+
+  private async loadFlowData(flowID: string) {
+    const flowData = await this.props.onLoadFlow(flowID);
+    // TODO dispatch action to set current flow data to `flowData`
+  }
+
+  private async createFlow(flowData: IFlowMetaData) {
+    const {dispatch, onCreateFlow} = this.props;
+    const flowID = await onCreateFlow(flowData);
+    dispatch(push(`/builder/${flowID}`));
+  }
+
+  componentWillReceiveProps(nextProps: IPintuBuilderProps) {
+    const {params: {flowID}} = nextProps;
+    if (flowID && flowID !== this.props.params.flowID) {
+      this.loadFlowData(flowID);
+    }
   }
 
   newModal() {
@@ -48,7 +75,6 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
 		node1.y = 100;
     node1.addListener({
       selectionChanged: (item, isSelected) => {
-        console.log({item, isSelected});//fd
       },
     });
 
@@ -94,15 +120,13 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
 
   _getConfigurationTrayStyle(): React.CSSProperties {
     return {
+      boxSizing: 'border-box',
       flex: '0 0 auto',
       height: '100%',
+      paddingTop: 4,
       paddingLeft: 4,
       width: 400,
     }
-  }
-
-  _onActionStart(action: SRD.BaseAction): boolean {
-    return false; // TODO figure out what it is
   }
 
   _onRightClickCanvas(e: React.MouseEvent<any>) {
@@ -112,12 +136,15 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
   }
 
   _onMouseDownCanvas(e: React.MouseEvent<any>) {
-    if (e.nativeEvent.which === 3) {
-      this.setState({
-        isMovingCanvas: true,
-      });
-      // TODO style the cursor
-    }
+    this.setState({
+      isMovingCanvas: true,
+    });
+  }
+
+  _onMouseUpCanvas(e: React.MouseEvent<any>) {
+    this.setState({
+      isMovingCanvas: false,
+    });
   }
 
   render() {
@@ -126,13 +153,14 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
     });
     // TODO use real nodes, this is just a trial.
     return (
-      <div 
+      <div
         className={rootClass}
         style={this._getRootStyle()}
       >
         <div 
           onContextMenu={(e) => this._onRightClickCanvas(e)}
           onMouseDown={(e) => this._onMouseDownCanvas(e)}
+          onMouseUp={(e) => this._onMouseUpCanvas(e)}
           style={this._getCanvasStyle()}
         >
           <DiagramWidget
@@ -147,8 +175,27 @@ class _PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderSta
   }
 }
 
-export const PintuBuilder = connect((state: IState) => {
-  return {
-    steps: state.builder.getSteps(),
-  };
-})(_PintuBuilder);
+export interface IFlow {
+  metaData: IFlowMetaData;
+  firstStepID: string;
+  steps: {[key: string]: IStepConfig};
+}
+export interface IBuilderEventHandlers {
+  // Given flow meta data, return a promise that resolves to the ID of the new
+  // flow.
+  onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
+  // Given a flow ID, return a promise that resolves to the complete flow data.
+  onLoadFlow: (flowID: string) => Promise<IFlow>;
+}
+export function createBuilder(
+  eventHandlers: IBuilderEventHandlers,
+  registry: ContainerRegistry,
+) {
+  DiagramEngine.setRegistry(registry);
+  return connect((state: IState) => {
+    return {
+      steps: state.builder.getSteps(),
+      ...eventHandlers,
+    };
+  })(PintuBuilder);
+}

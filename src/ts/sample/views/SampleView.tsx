@@ -12,6 +12,8 @@ export class SampleView extends React.Component<IProps, void> {
     name: 'Sample',
     pathTemplate: '/sample',
     component: SampleView,
+    inputs: {}, // TODO add some demo inputs
+    actions: {}, // TODO add some demo actions
   };
 
   render() {

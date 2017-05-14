@@ -1,15 +1,23 @@
 import * as Immutable from 'immutable';
+import {DiagramEngine, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../lib';
 
-export interface IStepConfig {
-  id: string;
-}
 
 const BuilderRecord = Immutable.Record({
+  flowMetaData: null,
   steps: Immutable.Map(),
 });
 
 export class BuilderState extends BuilderRecord {
+  flowMetaData: IFlowMetaData | null;
   steps: Immutable.Map<string, IStepConfig>;
+
+  setFlowMetaData(flowMetaData: IFlowMetaData) {
+    this.set('flowMetaData', flowMetaData);
+  }
+
+  setSteps(steps: {[key: string]: IStepConfig}) {
+    this.set('steps', Immutable.Map(steps));
+  }
 
   createStep(newStep: IStepConfig) {
     return this.setIn(['steps', newStep.id], newStep);
