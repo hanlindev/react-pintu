@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as Immutable from 'immutable';
 import {DiagramEngine, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../lib';
 
@@ -12,14 +13,24 @@ export class BuilderState extends BuilderRecord {
   steps: Immutable.Map<string, IStepConfig>;
 
   setFlowMetaData(flowMetaData: IFlowMetaData) {
-    this.set('flowMetaData', flowMetaData);
+    return this.set('flowMetaData', flowMetaData);
   }
 
   setSteps(steps: {[key: string]: IStepConfig}) {
-    this.set('steps', Immutable.Map(steps));
+    if (this.flowMetaData) {
+      const engine = DiagramEngine.getEngine(this.flowMetaData.flowID);
+      _.forEach(steps, (step) => {
+        engine.insertStep(step);
+      });
+    }
+    return this.set('steps', Immutable.Map(steps));
   }
 
   createStep(newStep: IStepConfig) {
+    if (this.flowMetaData) {
+      const engine = DiagramEngine.getEngine(this.flowMetaData.flowID);
+      engine.insertStep(newStep);
+    }
     return this.setIn(['steps', newStep.id], newStep);
   }
 

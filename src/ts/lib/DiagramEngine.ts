@@ -1,5 +1,6 @@
 import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel} from 'storm-react-diagrams';
 import {PintuNodeFactory} from '../components/builder/diagrams/PintuNodeFactory';
+import {PintuNodeModel} from '../components/builder/diagrams/PintuNodeModel';
 import {ContainerRegistry} from './ContainerRegistry';
 import {IStepConfig} from './interfaces';
 
@@ -7,11 +8,11 @@ export class DiagramEngine {
   static engines: {[id: string]: DiagramEngine} = {};
   static registry: ContainerRegistry;
 
-  steps: {[name: string]: IStepConfig} = {};
+  stepNodes: {[id: string]: PintuNodeModel} = {};
   engineImpl: SRDDiagramEngine;
   model: DiagramModel;
   
-  private constructor(id: string) {
+  private constructor(private id: string) {
     if (DiagramEngine.engines[id]) {
       throw new TypeError(`Duplicate engine found for id - ${id}`);
     }
@@ -32,8 +33,27 @@ export class DiagramEngine {
     return DiagramEngine.engines[id];
   }
 
-  // TODO 1. implement step to node conversion
-  // TODO 2. implement add new step
+  private getNode(step: IStepConfig) {
+    const container = DiagramEngine.registry.getContainer(step.containerName);
+    const node = new PintuNodeModel(step, container);
+    // TODO position the node if not automatically positioned.
+    return node;
+  }
+
+  /**
+   * @returns true if the step is inserted; false otherwise
+   */
+  insertStep(step: IStepConfig): boolean {
+    if (!this.stepNodes[step.id]) {
+      const node = this.getNode(step);
+      this.stepNodes[step.id] = node;
+      this.model.addNode(node);
+      // TODO setup link
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   static setRegistry(registry: ContainerRegistry) {
     if (registry !== DiagramEngine.registry) {
