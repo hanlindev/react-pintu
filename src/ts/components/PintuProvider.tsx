@@ -60,7 +60,7 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
           <Route 
             key={name}
             path={spec.pathTemplate} 
-            component={createRunner(spec)}
+            component={createRunner(spec, containerRegistry)}
           />
         );
       }

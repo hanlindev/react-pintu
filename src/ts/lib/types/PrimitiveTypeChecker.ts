@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as Props from 'prop-types';
 import {makeFactory} from './common';
-import {ITypeChecker, ReactPropType} from '../interfaces';
+import {ITypeChecker, ReactPropType, TypeCheckerFactory} from '../interfaces';
 
 type PrimitiveType = 
   'number' 
@@ -47,6 +47,25 @@ export class PrimitiveTypeChecker implements ITypeChecker {
 
   toString() {
     return JSON.stringify(['PrimitiveTypeChecker', this.type, this.required]);
+  }
+
+  toJSON() {
+    return this.toString();
+  }
+
+  static fromObject(typeObject: any): TypeCheckerFactory | null {
+    if (Array.isArray(typeObject)) {
+      const name = typeObject[0];
+      const type = typeObject[1];
+      const required = typeObject[2];
+      if (name === 'PrimitiveTypeChecker' && type && required !== undefined) {
+        const requireable = PrimitiveTypeChecker.getFactory(type);
+        return (required) 
+          ? requireable.isRequired
+          : requireable;
+      }
+    }
+    return null;
   }
 
   validate(value: any) {

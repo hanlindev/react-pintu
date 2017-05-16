@@ -1,11 +1,12 @@
 import * as React from 'react';
 import * as cx from 'classnames';
 import {connect} from 'react-redux';
-import * as SRD from 'storm-react-diagrams';
-import {DiagramWidget} from 'storm-react-diagrams';
+import {DiagramEngine, DiagramWidget} from 'storm-react-diagrams';
+import CircularProgress from 'material-ui/CircularProgress';
 
 import {IState} from '../../reducers';
-import {ContainerRegistry, DiagramEngine, IStepConfig, IFlowMetaData} from '../../lib';
+import {actions} from '../../reducers/builder';
+import {ContainerRegistry, FlowEngine, IFlow, IStepConfig, IFlowMetaData} from '../../lib';
 import {push} from 'react-router-redux';
 
 import 'storm-react-diagrams/src/sass.scss';
@@ -16,8 +17,8 @@ interface IParams {
 }
 
 export interface IPintuBuilderProps {
+  diagramEngine: DiagramEngine;
   dispatch: (action: any) => any;
-  steps: {[key: string]: IStepConfig};
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
   params: IParams;
@@ -28,15 +29,11 @@ interface IPintuBuilderState {
 }
 
 class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderState> {
-  protected activeModel: SRD.DiagramModel;
-  protected diagramEngine: SRD.DiagramEngine;
-
   state: IPintuBuilderState;
 
   constructor(props: IPintuBuilderProps) {
     super(props);
 
-    this.newModal();
     this.state = {
       isMovingCanvas: false,
     };
@@ -44,7 +41,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
 
   private async loadFlowData(flowID: string) {
     const flowData = await this.props.onLoadFlow(flowID);
-    // TODO dispatch action to set current flow data to `flowData`
+    this.props.dispatch(actions.setFlow(flowData));
   }
 
   private async createFlow(flowData: IFlowMetaData) {
@@ -59,46 +56,6 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       this.loadFlowData(flowID);
     }
   }
-
-  newModal() {
-    this.diagramEngine = new SRD.DiagramEngine();
-		this.diagramEngine.registerNodeFactory(new SRD.DefaultNodeFactory());
-		this.diagramEngine.registerLinkFactory(new SRD.DefaultLinkFactory());
-
-    this.activeModel = new SRD.DiagramModel();
-		this.diagramEngine.setDiagramModel(this.activeModel);
-		
-		
-		var node1 = new SRD.DefaultNodeModel("Node 1","rgb(0,192,255)");
-		var port1 = node1.addPort(new SRD.DefaultPortModel(false,"out-1","Out"));
-		node1.x = 100;
-		node1.y = 100;
-    node1.addListener({
-      selectionChanged: (item, isSelected) => {
-      },
-    });
-
-		var node2 = new SRD.DefaultNodeModel("Node 2","rgb(192,255,0)");
-		var port2 = node2.addPort(new SRD.DefaultPortModel(true,"in-1","IN"));
-		node2.x = 400;
-		node2.y = 100;
-
-		var link1 = new SRD.LinkModel();
-		link1.setSourcePort(port1);
-		link1.setTargetPort(port2);
-
-		this.activeModel.addNode(node1);
-		this.activeModel.addNode(node2);
-		this.activeModel.addLink(link1);
-  }
-
-  public getActiveDiagram(): SRD.DiagramModel{
-		return this.activeModel;
-	}
-	
-	public getDiagramEngine(): SRD.DiagramEngine{
-		return this.diagramEngine;
-	}
 
   _getRootStyle(): React.CSSProperties {
     return {
@@ -148,10 +105,26 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
   }
 
   render() {
+    const {diagramEngine} = this.props;
+    if (!diagramEngine) {
+      return (
+        <div 
+          style={{
+            boxSizing: 'border-box',
+            height: '100vh', 
+            paddingTop: 400,
+            textAlign: 'center',
+            width: '100vw',
+          }}
+        >
+          <CircularProgress />
+        </div>
+      );
+    }
+
     const rootClass = cx({
       'is-moving-canvas': this.state.isMovingCanvas,
     });
-    // TODO use real nodes, this is just a trial.
     return (
       <div
         className={rootClass}
@@ -164,7 +137,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           style={this._getCanvasStyle()}
         >
           <DiagramWidget
-            diagramEngine={this.diagramEngine} 
+            diagramEngine={this.props.diagramEngine} 
           />
         </div>
         <div style={this._getConfigurationTrayStyle()}>
@@ -175,11 +148,6 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
   }
 }
 
-export interface IFlow {
-  metaData: IFlowMetaData;
-  firstStepID: string;
-  steps: {[key: string]: IStepConfig};
-}
 export interface IBuilderEventHandlers {
   // Given flow meta data, return a promise that resolves to the ID of the new
   // flow.
@@ -191,11 +159,11 @@ export function createBuilder(
   eventHandlers: IBuilderEventHandlers,
   registry: ContainerRegistry,
 ) {
-  DiagramEngine.setRegistry(registry);
+  FlowEngine.setRegistry(registry);
   return connect((state: IState) => {
     return {
-      steps: state.builder.getSteps(),
       ...eventHandlers,
+      diagramEngine: state.builder.getDiagramEngine(),
     };
   })(PintuBuilder);
 }

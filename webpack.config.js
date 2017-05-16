@@ -2,6 +2,8 @@ var webpack = require('webpack');
 var path = require('path');
 var bourbon = require('node-bourbon').includePaths;
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+let CircularDependencyPlugin = require('circular-dependency-plugin')
+
 const extractSass = new ExtractTextPlugin({
   filename: 'bundle.css?[contenthash]',
   disable: process.env.NODE_ENV === 'development'
@@ -84,5 +86,11 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     extractSass,
+    new CircularDependencyPlugin({
+      // exclude detection of files based on a RegExp 
+      exclude: /a\.js|node_modules/,
+      // add errors to webpack instead of warnings 
+      failOnError: true
+    })
   ]
 };

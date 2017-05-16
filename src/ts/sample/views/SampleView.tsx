@@ -11,7 +11,6 @@ export class SampleView extends React.Component<IProps, void> {
   static container: IContainerSpec = {
     name: 'Sample',
     pathTemplate: '/sample',
-    component: SampleView,
     inputs: {}, // TODO add some demo inputs
     actions: {}, // TODO add some demo actions
   };

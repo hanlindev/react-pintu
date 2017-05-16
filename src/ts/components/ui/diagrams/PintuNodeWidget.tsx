@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {DiagramEngine} from 'storm-react-diagrams';
+import {DiagramEngine, NodeWidgetFactory} from 'storm-react-diagrams';
 import {PintuNodeModel} from './PintuNodeModel';
 import {PintuPortWidget} from './PintuPortWidget';
 
@@ -79,5 +79,15 @@ export class PintuNodeWidget extends React.Component<IPintuNodeWidgetProps, void
         {content}
       </div>
     );
+  }
+}
+
+export class PintuNodeWidgetFactory extends NodeWidgetFactory {
+  constructor() {
+    super('Pintu');
+  }
+
+  generateReactWidget(diagramEngine: DiagramEngine, node: PintuNodeModel) {
+    return <PintuNodeWidget diagramEngine={diagramEngine} node={node} />;
   }
 }

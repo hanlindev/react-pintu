@@ -1,7 +1,7 @@
-import {ITypeChecker} from './type';
+import {TypeCheckerFactory} from './type';
 
 export interface IPayloadDeclaration {
-  [key: string]: ITypeChecker;
+  [key: string]: TypeCheckerFactory;
 }
 
 export interface IInputsDeclaration extends IPayloadDeclaration {}

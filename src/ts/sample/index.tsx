@@ -24,6 +24,6 @@ class PintuSample extends React.Component<{}, void> {
 window.addEventListener('load', (e: Event) => {
   ReactDOM.render(
     <PintuSample />,
-    document.body,
+    document.getElementById('app'),
   );
 });

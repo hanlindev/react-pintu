@@ -1,1 +1,1 @@
-export {createBuilder, IBuilderEventHandlers, IFlow} from './PintuBuilder';
+export {createBuilder, IBuilderEventHandlers} from './PintuBuilder';

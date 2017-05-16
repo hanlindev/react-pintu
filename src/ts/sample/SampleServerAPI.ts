@@ -24,6 +24,7 @@ function onLoadFlow(flowID: string): Promise<IFlow> {
           destinations: {},
         },
       },
+      serializedDiagram: null,
     };
     resolve(dummyFlow);
   });

@@ -22,3 +22,10 @@ export interface IStepConfig {
   containerName: string;
   destinations: {[actionName: string]: IActionDestination};
 }
+
+export interface IFlow {
+  metaData: IFlowMetaData;
+  firstStepID: string;
+  steps: {[key: string]: IStepConfig};
+  serializedDiagram: string | null;
+}
