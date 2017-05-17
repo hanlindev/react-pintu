@@ -17,12 +17,12 @@ export class PintuActionPortModel extends PintuBasePortModel {
   }
 
   setData(action: IAction) {
-    this.name = action.name;
+    this.name = action.id;
     this._action = action;
   }
 
   getLabel() {
-    return this._action.name;
+    return this._action.label;
   }
 
   serialize() {
@@ -52,7 +52,8 @@ export class PintuActionPortModel extends PintuBasePortModel {
     }
 
     this.setData({
-      name: data.name,
+      id: data.id,
+      label: data.label,
       type: data.type,
       payload,
     });

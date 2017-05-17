@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {Button} from '../../components/ui/Button';
 import {IContainerSpec} from '../../lib/ContainerRegistry';
+import * as Types from '../../lib/types';
 
 interface IProps {
 
@@ -9,10 +10,33 @@ interface IProps {
 
 export class SampleView extends React.Component<IProps, void> {
   static container: IContainerSpec = {
-    name: 'Sample',
+    name: 'SampleView',
     pathTemplate: '/sample',
-    inputs: {}, // TODO add some demo inputs
-    actions: {}, // TODO add some demo actions
+    inputs: {
+      testString: Types.string,
+      testArray: Types.array,
+      typeObject: Types.object,
+      testNumber: Types.number,
+      testBool: Types.bool,
+    },
+    actions: {
+      testAction1: {
+        id: 'testAction1',
+        label: 'Test Action 1',
+        type: 'endOfStep',
+        payload: {
+          strArg: Types.string,
+        }
+      },
+      testAction2: {
+        id: 'testAction2',
+        label: 'Test Action 2',
+        type: 'intermediate',
+        payload: {
+          numArg: Types.number,
+        },
+      }
+    },
   };
 
   render() {

@@ -41,13 +41,20 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
 
   private async loadFlowData(flowID: string) {
     const flowData = await this.props.onLoadFlow(flowID);
-    this.props.dispatch(actions.setFlow(flowData));
+    this.props.dispatch(actions.loadFlow(flowData));
   }
 
   private async createFlow(flowData: IFlowMetaData) {
     const {dispatch, onCreateFlow} = this.props;
     const flowID = await onCreateFlow(flowData);
     dispatch(push(`/builder/${flowID}`));
+  }
+
+  componentDidMount() {
+    const {params: {flowID}} = this.props;
+    if (flowID) {
+      this.loadFlowData(flowID);
+    }
   }
 
   componentWillReceiveProps(nextProps: IPintuBuilderProps) {
@@ -72,6 +79,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       boxShadow: 'rgba(0, 0, 0, 0.7) 0px 0px 4px, rgba(0, 0, 0, 0.4) -4px 0px 8px',
       flex: 1,
       height: '100%',
+      userSelect: 'none',
     };
   }
 

@@ -28,7 +28,6 @@ export class FlowEngine {
     this.engineImpl.registerNodeFactory(new PintuNodeWidgetFactory());
     this.engineImpl.registerLinkFactory(new DefaultLinkFactory());
     
-    this.diagramModel.serializeDiagram
     this.diagramModel = new DiagramModel();
     this.engineImpl.setDiagramModel(this.diagramModel);
   }
@@ -73,6 +72,10 @@ export class FlowEngine {
   insertStep(step: IStepConfig): boolean {
     if (!this.stepNodes[step.id]) {
       const node = this.buildNode(step);
+      // fd section
+      node.x = 500;
+      node.y = 400;
+      // end fd section
       this.stepNodes[step.id] = node;
       this.diagramModel.addNode(node);
       return true;
@@ -112,5 +115,7 @@ export class FlowEngine {
         this.restoreLinks(step);
       });
     }
+    console.log(this);//fd
+    this.diagramEngine.repaintCanvas();
   }
 }

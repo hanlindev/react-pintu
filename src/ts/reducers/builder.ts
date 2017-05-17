@@ -6,29 +6,27 @@ import {FlowEngine} from '../lib/FlowEngine';
 
 
 const BuilderRecord = Immutable.Record({
-  flowMetaData: null,
-  steps: Immutable.Map(),
-  firstStepID: '0',
-  serializedDiagram: null,
+  flow: null,
 });
 
 export class BuilderState extends BuilderRecord {
-  flowMetaData: IFlowMetaData | null;
-  steps: Immutable.Map<string, IStepConfig>;
-  firstStepID: string;
-  serializedDiagram: string | null;
+  flow: IFlow | null;
 
   setFlow(flow: IFlow) {
-    return this.merge({
-      ...flow,
-      steps: Immutable.Map(flow.steps),
-    });
+    return this.set('flow', flow);
+  }
+
+  restoreFlowEngine() {
+    const engine = this.getFlowEngine();
+    if (this.flow && engine) {
+      engine.restoreFlow(this.flow);
+    }
+    return this;
   }
 
   getFlowEngine(): FlowEngine | null {
-    const flow = this.getFlow();
-    if (flow) {
-      return FlowEngine.getEngine(flow);
+    if (this.flow) {
+      return FlowEngine.getEngine(this.flow);
     }
     return null;
   }
@@ -41,28 +39,6 @@ export class BuilderState extends BuilderRecord {
     return null;
   }
 
-  getFlow(): IFlow | null {
-    if (this.flowMetaData) {
-      return {
-        metaData: this.flowMetaData,
-        steps: this.steps.toJS(),
-        firstStepID: this.firstStepID,
-        serializedDiagram: this.serializedDiagram,
-      };
-    }
-    return null;
-  }
-
-  setSteps(steps: {[key: string]: IStepConfig}) {
-    const engine = this.getFlowEngine();
-    if (engine) {
-      _.forEach(steps, (step) => {
-        engine.insertStep(step);
-      });
-    }
-    return this.set('steps', Immutable.Map(steps));
-  }
-
   createStep(newStep: IStepConfig) {
     const engine = this.getFlowEngine();
     if (engine) {
@@ -72,17 +48,24 @@ export class BuilderState extends BuilderRecord {
   }
 
   getSteps(): {[key: string]: IStepConfig} {
-    return this.steps.toJS();
+    if (this.flow) {
+      return this.flow.steps;
+    }
+    return {};
   }
 }
 
 const CREATE_STEP = 'builder.createStep';
 const SET_FLOW = 'builder.setFlow';
+const RESTORE_FLOW = 'builder.restoreFlow';
 
 type BuilderActionType =
 {
   type: 'builder.createStep',
   newStep: IStepConfig,
+}
+| {
+  type: 'builder.restoreFlow',
 }
 | {
   type: 'builder.setFlow',
@@ -99,22 +82,37 @@ export function builder(state: BuilderState, action: BuilderActionType) {
       return state.createStep(action.newStep);
     case SET_FLOW:
       return state.setFlow(action.newFlow);
+    case RESTORE_FLOW:
+      return state.restoreFlowEngine();
   }
   return state;
 }
 
 export const actions = {
-  createStep(newStep: IStepConfig) {
+  createStep(newStep: IStepConfig): BuilderActionType {
     return {
       type: CREATE_STEP,
       newStep,
     };
   },
 
-  setFlow(newFlow: IFlow) {
+  setFlow(newFlow: IFlow): BuilderActionType {
     return {
       type: SET_FLOW,
       newFlow,
     };
+  },
+
+  restoreFlow(): BuilderActionType {
+    return {
+      type: RESTORE_FLOW,
+    };
+  },
+
+  loadFlow(newFlow: IFlow) {
+    return (dispatch: Function) => {
+      dispatch(actions.setFlow(newFlow));
+      dispatch(actions.restoreFlow());
+    }
   },
 }

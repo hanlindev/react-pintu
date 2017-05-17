@@ -71,7 +71,7 @@ export function getDefaultTheme(): ITheme {
       huge: 26,
     },
     fontSize: {
-      small: 8,
+      small: 10,
       medium: 13,
       large: 20,
     },

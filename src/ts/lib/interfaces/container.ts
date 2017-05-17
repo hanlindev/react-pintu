@@ -7,7 +7,8 @@ export interface IPayloadDeclaration {
 export interface IInputsDeclaration extends IPayloadDeclaration {}
 
 export interface IAction {
-  name: string;
+  id: string;
+  label: string;
   type: 'intermediate' | 'endOfStep';
   payload: IPayloadDeclaration;
 }

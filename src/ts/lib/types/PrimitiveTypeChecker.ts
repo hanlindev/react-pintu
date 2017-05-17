@@ -14,13 +14,25 @@ type LodashChecker = (value: any) => boolean;
 export class PrimitiveTypeChecker implements ITypeChecker {
   private lodashChecker: LodashChecker;
 
+  get type(): PrimitiveType {
+    return (() => {
+      return this._type;
+    })();
+  }
+
+  get required(): boolean {
+    return (() => {
+      return this._required;
+    })();
+  }
+
   constructor(
-    private type: PrimitiveType,
-    private required: boolean,
+    private _type: PrimitiveType,
+    private _required: boolean,
   ) {
-    this.lodashChecker = (_ as any)[`is${_.upperFirst(type)}`];
+    this.lodashChecker = (_ as any)[`is${_.upperFirst(_type)}`];
     if (!this.lodashChecker) {
-      throw new TypeError(`Invalid type - ${type}`);
+      throw new TypeError(`Invalid type - ${_type}`);
     }
   }
 
@@ -33,20 +45,20 @@ export class PrimitiveTypeChecker implements ITypeChecker {
 
   toPropType(): ReactPropType {
     let result;
-    switch (this.type) {
+    switch (this._type) {
       case 'boolean':
         result = Props.bool;
       case 'function':
         result = Props.func;
       default:
-        result = (Props as any)[this.type];
+        result = (Props as any)[this._type];
     }
 
-    return (this.required) ? result.isReqeuired : result;
+    return (this._required) ? result.isReqeuired : result;
   }
 
   toString() {
-    return JSON.stringify(['PrimitiveTypeChecker', this.type, this.required]);
+    return JSON.stringify(['PrimitiveTypeChecker', this._type, this._required]);
   }
 
   toJSON() {
@@ -70,7 +82,7 @@ export class PrimitiveTypeChecker implements ITypeChecker {
 
   validate(value: any) {
     return (
-      (!this.required && value === undefined)
+      (!this._required && value === undefined)
       || this.lodashChecker(value)
     );
   }

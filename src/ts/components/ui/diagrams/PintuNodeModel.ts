@@ -19,7 +19,7 @@ export class PintuNodeModel extends NodeModel {
   }
 
   constructor(config?: IStepConfig, container?: IContainerSpec) {
-    super('pintuNode');
+    super('PintuNode');
     if (config && container) {
       this.setData(config, container);
     }
@@ -135,7 +135,7 @@ export class PintuNodeModel extends NodeModel {
   getActionPortWithName(actionName: string): PintuActionPortModel | undefined {
     const actionPortModels = this.getActionPortModels();
     return actionPortModels.find((portModel) => {
-      return portModel.action.name === actionName;
+      return portModel.action.id === actionName;
     });
   }
 
