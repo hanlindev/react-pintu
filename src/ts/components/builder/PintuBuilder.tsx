@@ -1,12 +1,12 @@
 import * as React from 'react';
 import * as cx from 'classnames';
 import {connect} from 'react-redux';
-import {DiagramEngine, DiagramWidget} from 'storm-react-diagrams';
+import {DiagramEngine, DiagramModel, DiagramWidget} from 'storm-react-diagrams';
 import CircularProgress from 'material-ui/CircularProgress';
 
 import {IState} from '../../reducers';
 import {actions} from '../../reducers/builder';
-import {ContainerRegistry, FlowEngine, IFlow, IStepConfig, IFlowMetaData} from '../../lib';
+import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
 import {push} from 'react-router-redux';
 
 import 'storm-react-diagrams/src/sass.scss';
@@ -17,10 +17,13 @@ interface IParams {
 }
 
 export interface IPintuBuilderProps {
-  diagramEngine: DiagramEngine;
   dispatch: (action: any) => any;
+  flow: IFlow | null;
+  flowEngine: FlowEngine | null;
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
+  onAutoSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
+  onUserSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   params: IParams;
 }
 
@@ -39,9 +42,22 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     };
   }
 
+  private getDiagramEngine(
+    flowEngine: FlowEngine | null,
+  ): DiagramEngine | null {
+    return (flowEngine) ? flowEngine.diagramEngine : null;
+  }
+
+  private getDiagramModel(
+    flowEngine: FlowEngine | null,
+  ): DiagramModel | null {
+    const engine = this.getDiagramEngine(flowEngine);
+    return engine && engine.getDiagramModel();
+  }
+
   private async loadFlowData(flowID: string) {
     const flowData = await this.props.onLoadFlow(flowID);
-    this.props.dispatch(actions.loadFlow(flowData));
+    this.props.dispatch(actions.setFlow(flowData));
   }
 
   private async createFlow(flowData: IFlowMetaData) {
@@ -50,18 +66,69 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     dispatch(push(`/builder/${flowID}`));
   }
 
+  private syncNewEngine(
+    newFlowEngine: FlowEngine | null, 
+    oldFlowEngine: FlowEngine | null,
+  ) {
+    const newEngine = this.getDiagramEngine(newFlowEngine);
+    const {flow} = this.props;
+    if (!newFlowEngine || !newEngine || !flow) {
+      return;
+    }
+
+    if (newFlowEngine && newFlowEngine !== oldFlowEngine) {
+      newFlowEngine.restoreFlow(flow);
+    }
+    const diagramEngine = this.getDiagramEngine(oldFlowEngine);
+    const newModel = newEngine.getDiagramModel();
+    const oldModel = diagramEngine && diagramEngine.getDiagramModel();
+    if (newModel && newModel !== oldModel) {
+      oldModel && oldModel.clearListeners();
+      newModel.addListener({
+        linksUpdated: () => {
+          this.serializeDiagram();
+        },
+        nodesUpdated: () => {
+          this.serializeDiagram();
+        }
+      });
+    }
+  }
+
+  private serializeDiagram() {
+    const diagramModel = this.getDiagramModel(this.props.flowEngine);
+    if (diagramModel) {
+      const serializeDiagram = JSON.stringify(diagramModel.serializeDiagram());
+      this.props.dispatch(actions.setSerializedDiagram(serializeDiagram));
+    }
+  }
+
   componentDidMount() {
     const {params: {flowID}} = this.props;
     if (flowID) {
       this.loadFlowData(flowID);
     }
+    this.syncNewEngine(this.props.flowEngine, null);
   }
 
   componentWillReceiveProps(nextProps: IPintuBuilderProps) {
-    const {params: {flowID}} = nextProps;
+    const {
+      params: {flowID}, 
+      flow,
+      onAutoSaveFlow,
+    } = nextProps;
     if (flowID && flowID !== this.props.params.flowID) {
       this.loadFlowData(flowID);
     }
+
+    if (flow && flow !== this.props.flow) {
+      onAutoSaveFlow && onAutoSaveFlow(flow);
+    }
+  }
+
+  componentDidUpdate(prevProps: IPintuBuilderProps) {
+    const prevFlowEngine = prevProps.flowEngine;
+    this.syncNewEngine(this.props.flowEngine, prevFlowEngine);
   }
 
   _getRootStyle(): React.CSSProperties {
@@ -110,10 +177,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.setState({
       isMovingCanvas: false,
     });
+    this.serializeDiagram();
   }
 
   render() {
-    const {diagramEngine} = this.props;
+    const diagramEngine = this.getDiagramEngine(this.props.flowEngine);
     if (!diagramEngine) {
       return (
         <div 
@@ -145,7 +213,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           style={this._getCanvasStyle()}
         >
           <DiagramWidget
-            diagramEngine={this.props.diagramEngine} 
+            diagramEngine={diagramEngine} 
           />
         </div>
         <div style={this._getConfigurationTrayStyle()}>
@@ -156,13 +224,6 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
   }
 }
 
-export interface IBuilderEventHandlers {
-  // Given flow meta data, return a promise that resolves to the ID of the new
-  // flow.
-  onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
-  // Given a flow ID, return a promise that resolves to the complete flow data.
-  onLoadFlow: (flowID: string) => Promise<IFlow>;
-}
 export function createBuilder(
   eventHandlers: IBuilderEventHandlers,
   registry: ContainerRegistry,
@@ -171,7 +232,8 @@ export function createBuilder(
   return connect((state: IState) => {
     return {
       ...eventHandlers,
-      diagramEngine: state.builder.getDiagramEngine(),
+      flow: state.builder.getFlowClone(),
+      flowEngine: state.builder.getFlowEngine(),
     };
   })(PintuBuilder);
 }

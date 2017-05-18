@@ -1,9 +1,8 @@
 import * as _ from 'lodash';
 import {DiagramEngine} from 'storm-react-diagrams';
 import * as Immutable from 'immutable';
-import {IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../lib/interfaces';
+import {ILinkSource, IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../lib/interfaces';
 import {FlowEngine} from '../lib/FlowEngine';
-
 
 const BuilderRecord = Immutable.Record({
   flow: null,
@@ -16,19 +15,15 @@ export class BuilderState extends BuilderRecord {
     return this.set('flow', flow);
   }
 
-  restoreFlowEngine() {
-    const engine = this.getFlowEngine();
-    if (this.flow && engine) {
-      engine.restoreFlow(this.flow);
-    }
-    return this;
-  }
-
   getFlowEngine(): FlowEngine | null {
     if (this.flow) {
       return FlowEngine.getEngine(this.flow);
     }
     return null;
+  }
+
+  getFlowClone(): IFlow | null{
+    return _.cloneDeep(this.flow);
   }
 
   getDiagramEngine(): DiagramEngine | null {
@@ -39,33 +34,43 @@ export class BuilderState extends BuilderRecord {
     return null;
   }
 
-  createStep(newStep: IStepConfig) {
+  createStep(newStep: IStepConfig, linkSrc?: ILinkSource) {
     const engine = this.getFlowEngine();
     if (engine) {
-      engine.insertStep(newStep);
+      engine.insertStep(newStep, linkSrc);
     }
     return this.setIn(['steps', newStep.id], newStep);
   }
 
   getSteps(): {[key: string]: IStepConfig} {
     if (this.flow) {
-      return this.flow.steps;
+      return _.cloneDeep(this.flow.steps);
     }
     return {};
+  }
+
+  setSerializedDiagram(serializedDiagram: string) {
+    return this.set('flow', {
+      ...this.getFlowClone(),
+      serializedDiagram,
+    });
   }
 }
 
 const CREATE_STEP = 'builder.createStep';
 const SET_FLOW = 'builder.setFlow';
 const RESTORE_FLOW = 'builder.restoreFlow';
+const SET_SERIALIZED_DIAGRAM = 'builder.setSerializedDiagram';
 
 type BuilderActionType =
 {
   type: 'builder.createStep',
   newStep: IStepConfig,
+  linkSrc?: ILinkSource,
 }
 | {
-  type: 'builder.restoreFlow',
+  type: 'builder.setSerializedDiagram',
+  serializedDiagram: string,
 }
 | {
   type: 'builder.setFlow',
@@ -82,17 +87,18 @@ export function builder(state: BuilderState, action: BuilderActionType) {
       return state.createStep(action.newStep);
     case SET_FLOW:
       return state.setFlow(action.newFlow);
-    case RESTORE_FLOW:
-      return state.restoreFlowEngine();
+    case SET_SERIALIZED_DIAGRAM:
+      return state.setSerializedDiagram(action.serializedDiagram);
   }
   return state;
 }
 
 export const actions = {
-  createStep(newStep: IStepConfig): BuilderActionType {
+  createStep(newStep: IStepConfig, linkSrc?: ILinkSource): BuilderActionType {
     return {
       type: CREATE_STEP,
       newStep,
+      linkSrc,
     };
   },
 
@@ -103,16 +109,10 @@ export const actions = {
     };
   },
 
-  restoreFlow(): BuilderActionType {
+  setSerializedDiagram(serializedDiagram: string): BuilderActionType {
     return {
-      type: RESTORE_FLOW,
+      type: SET_SERIALIZED_DIAGRAM,
+      serializedDiagram,
     };
-  },
-
-  loadFlow(newFlow: IFlow) {
-    return (dispatch: Function) => {
-      dispatch(actions.setFlow(newFlow));
-      dispatch(actions.restoreFlow());
-    }
   },
 }

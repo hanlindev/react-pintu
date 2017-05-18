@@ -132,10 +132,10 @@ export class PintuNodeModel extends NodeModel {
     return this.getPortModelsByType(PintuActionPortModel);
   }
 
-  getActionPortWithName(actionName: string): PintuActionPortModel | undefined {
+  getActionPortWithName(actionId: string): PintuActionPortModel | undefined {
     const actionPortModels = this.getActionPortModels();
     return actionPortModels.find((portModel) => {
-      return portModel.action.id === actionName;
+      return portModel.action.id === actionId;
     });
   }
 
@@ -150,24 +150,24 @@ export class PintuNodeModel extends NodeModel {
    *           false otherwise
    */
   tryRestoreLink(
-    actionName: string, 
+    actionId: string, 
     destNode: PintuNodeModel,
     targetModel: DiagramModel
   ): boolean {
-    const destConfig = this.config.destinations[actionName];
+    const destConfig = this.config.destinations[actionId];
     if (!destConfig) {
       throw new TypeError(
-        `Action config (${actionName}) not found in `
+        `Action config (${actionId}) not found in `
         + `step (${this.container.name}).`,
       );
     }
 
     if (destConfig.type === 'step' && destConfig.stepID === destNode.id) {
       // TODO Only support in-flow connection for now, implement in future
-      const srcActionPort = this.getActionPortWithName(actionName);
+      const srcActionPort = this.getActionPortWithName(actionId);
       if (!srcActionPort) {
         throw new TypeError(
-          `Action ${actionName} not found in ` 
+          `Action ${actionId} not found in ` 
           + `container ${this.container.name}`,
         );
       }

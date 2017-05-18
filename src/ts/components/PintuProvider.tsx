@@ -5,10 +5,11 @@ import {Provider} from 'react-redux'
 import {Router, Route} from 'react-router';
 
 import {createRunner} from './runner';
-import {createBuilder, IBuilderEventHandlers} from './builder/PintuBuilder';
+import {createBuilder} from './builder/PintuBuilder';
 import {history, store} from '../lib/History';
 import {ContainerRegistry} from '../lib/ContainerRegistry';
 import {getDefaultTheme, ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
+import {IBuilderEventHandlers} from '../lib/interfaces';
 
 export interface IPintuProviderProps {
   appWrapper?: React.StatelessComponent<any>;

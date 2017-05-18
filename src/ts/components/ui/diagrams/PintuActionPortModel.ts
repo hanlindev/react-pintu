@@ -44,7 +44,8 @@ export class PintuActionPortModel extends PintuBasePortModel {
 
   deSerialize(data: any) {
     super.deSerialize(data);
-    const payload = deSerializePayloadDeclaration(data.payloadImpl);
+    const payload = 
+      deSerializePayloadDeclaration(data.serializedAction.payloadImpl);
     if (!payload) {
       throw new TypeError(
         `Invalid serialized payload declaration for ${data.name} action`,

@@ -10,10 +10,14 @@ export type IActionDestination =
   stepID: string,
 }
 
+export interface ILinkSource {
+  stepID: string;
+  actionID: string;
+}
+
 export interface IFlowMetaData {
-  flowDescription: string;
-  flowID: string;
-  flowName: string;
+  description: string;
+  name: string;
 }
 
 export interface IStepConfig {
@@ -24,6 +28,7 @@ export interface IStepConfig {
 }
 
 export interface IFlow {
+  id: string;
   metaData: IFlowMetaData;
   firstStepID: string;
   steps: {[key: string]: IStepConfig};

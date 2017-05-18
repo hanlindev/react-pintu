@@ -1,11 +1,27 @@
 import * as _ from 'lodash';
-import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel} from 'storm-react-diagrams';
+import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel, LinkInstanceFactory} from 'storm-react-diagrams';
 import {PintuNodeWidgetFactory} from '../components/ui/diagrams/PintuNodeWidget';
 import {PintuNodeModel, PintuNodeInstanceFactory} from '../components/ui/diagrams/PintuNodeModel';
-import {PintuActionPortModel} from '../components/ui/diagrams/PintuActionPortModel';
+import {PintuActionPortFactory} from '../components/ui/diagrams/PintuActionPortModel';
+import {PintuInputPortFactory} from '../components/ui/diagrams/PintuInputPortModel';
+import {PintuEntrancePortFactory} from '../components/ui/diagrams/PintuEntrancePortModel';
 import {ContainerRegistry} from './ContainerRegistry';
-import {IStepConfig, IFlow} from './interfaces';
+import {IStepConfig, IFlow, ILinkSource} from './interfaces';
 
+/**
+ * The StormReactDiagram engine works independently from the BuilderState's
+ * data model. The diagram is always changed before the builder state change.
+ * So the correct order of operation in Linking event is:
+ * 1. Diagram change
+ * 2. BuilderState change or reject the change if the change is invalid, e.g
+ *    variable type violation.
+ * 3. If BuilderState passes a change, the BuilderState will call
+ *    FlowEngine::acceptChange(change). The the srcStep's action will configured
+ *    to point to destStep. If this is not called, the link will not be
+ *    persisted nor serialized.
+ * 4. If BuilderState rejects a change, the BuilderState will call
+ *    FlowEngine::rejectChange(change). The change will be reverted.
+ */
 export class FlowEngine {
   static engines: {[id: string]: FlowEngine} = {};
   static registry: ContainerRegistry;
@@ -25,6 +41,10 @@ export class FlowEngine {
 
     this.engineImpl = new SRDDiagramEngine();
     this.engineImpl.registerInstanceFactory(new PintuNodeInstanceFactory());
+    this.engineImpl.registerInstanceFactory(new PintuInputPortFactory());
+    this.engineImpl.registerInstanceFactory(new PintuActionPortFactory());
+    this.engineImpl.registerInstanceFactory(new PintuEntrancePortFactory());
+    this.engineImpl.registerInstanceFactory(new LinkInstanceFactory());
     this.engineImpl.registerNodeFactory(new PintuNodeWidgetFactory());
     this.engineImpl.registerLinkFactory(new DefaultLinkFactory());
     
@@ -33,7 +53,7 @@ export class FlowEngine {
   }
 
   static getEngine(flow: IFlow): FlowEngine {
-    const id = flow.metaData.flowID;
+    const {id} = flow;
     if (!FlowEngine.engines[id]) {
       const newEngine = new FlowEngine(id);
       newEngine.restoreFlow(flow);
@@ -69,14 +89,15 @@ export class FlowEngine {
   /**
    * @returns true if the step is inserted; false otherwise
    */
-  insertStep(step: IStepConfig): boolean {
+  insertStep(step: IStepConfig, src?: ILinkSource): boolean {
     if (!this.stepNodes[step.id]) {
       const node = this.buildNode(step);
-      // fd section
-      node.x = 500;
-      node.y = 400;
-      // end fd section
       this.stepNodes[step.id] = node;
+
+      if (src) {
+        const {stepID, actionID} = src;
+      }
+
       this.diagramModel.addNode(node);
       return true;
     } else {
@@ -115,7 +136,6 @@ export class FlowEngine {
         this.restoreLinks(step);
       });
     }
-    console.log(this);//fd
     this.diagramEngine.repaintCanvas();
   }
 }
