@@ -21,7 +21,6 @@ export class PintuActionPortLabel extends ThemeableComponent<IPintuActionPortLab
       />
     );
     const label = model.getLabel();
-
     return (
       <div 
         {...others}

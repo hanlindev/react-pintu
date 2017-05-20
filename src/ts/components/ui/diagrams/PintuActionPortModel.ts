@@ -26,7 +26,6 @@ export class PintuActionPortModel extends PintuBasePortModel {
   }
 
   serialize() {
-    // TODO serialize payload declaration
     const {
       payload,
       ...others,
@@ -44,8 +43,9 @@ export class PintuActionPortModel extends PintuBasePortModel {
 
   deSerialize(data: any) {
     super.deSerialize(data);
+    const {serializedAction} = data;
     const payload = 
-      deSerializePayloadDeclaration(data.serializedAction.payloadImpl);
+      deSerializePayloadDeclaration(serializedAction.payloadImpl);
     if (!payload) {
       throw new TypeError(
         `Invalid serialized payload declaration for ${data.name} action`,
@@ -53,9 +53,9 @@ export class PintuActionPortModel extends PintuBasePortModel {
     }
 
     this.setData({
-      id: data.id,
-      label: data.label,
-      type: data.type,
+      id: serializedAction.id,
+      label: serializedAction.label,
+      type: serializedAction.type,
       payload,
     });
   }

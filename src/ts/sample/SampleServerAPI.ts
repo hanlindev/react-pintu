@@ -15,10 +15,10 @@ const DefaultFlow: IFlow = {
       id: '0',
       containerName: 'SampleView',
       destinations: {
-        testAction1: {
-          type: 'step',
-          stepID: '1',
-        },
+        // testAction1: {
+        //   type: 'step',
+        //   stepID: '1',
+        // },
       },
     },
     1: {

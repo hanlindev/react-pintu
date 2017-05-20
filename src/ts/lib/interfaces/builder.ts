@@ -1,13 +1,5 @@
 import {IFlowMetaData, IFlow} from './flow';
 
-export type DiagramChangeType = 
-{
-  type: 'link',
-  srcStepID: string,
-  actionID: string,
-  destStepID: string,
-};
-
 export type FlowSaveResultType = 
 {
   // The save operation will be performed after timeout.

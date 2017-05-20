@@ -1,12 +1,13 @@
 import * as _ from 'lodash';
 import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel, LinkInstanceFactory} from 'storm-react-diagrams';
-import {PintuNodeWidgetFactory} from '../components/ui/diagrams/PintuNodeWidget';
-import {PintuNodeModel, PintuNodeInstanceFactory} from '../components/ui/diagrams/PintuNodeModel';
-import {PintuActionPortFactory} from '../components/ui/diagrams/PintuActionPortModel';
-import {PintuInputPortFactory} from '../components/ui/diagrams/PintuInputPortModel';
-import {PintuEntrancePortFactory} from '../components/ui/diagrams/PintuEntrancePortModel';
-import {ContainerRegistry} from './ContainerRegistry';
-import {IStepConfig, IFlow, ILinkSource} from './interfaces';
+import {PintuNodeWidgetFactory} from '../../components/ui/diagrams/PintuNodeWidget';
+import {PintuNodeModel, PintuNodeInstanceFactory} from '../../components/ui/diagrams/PintuNodeModel';
+import {PintuActionPortFactory} from '../../components/ui/diagrams/PintuActionPortModel';
+import {PintuInputPortFactory} from '../../components/ui/diagrams/PintuInputPortModel';
+import {PintuEntrancePortFactory} from '../../components/ui/diagrams/PintuEntrancePortModel';
+import {ContainerRegistry} from '../ContainerRegistry';
+import {IStepConfig, IFlow, ILinkSource} from '../interfaces';
+import {IFlowEngine} from './interfaces';
 
 /**
  * The StormReactDiagram engine works independently from the BuilderState's
@@ -22,9 +23,11 @@ import {IStepConfig, IFlow, ILinkSource} from './interfaces';
  * 4. If BuilderState rejects a change, the BuilderState will call
  *    FlowEngine::rejectChange(change). The change will be reverted.
  */
-export class FlowEngine {
+export class FlowEngine implements IFlowEngine {
   static engines: {[id: string]: FlowEngine} = {};
   static registry: ContainerRegistry;
+
+  private hasSynced: boolean;
 
   stepNodes: {[id: string]: PintuNodeModel} = {};
   engineImpl: SRDDiagramEngine;
@@ -50,13 +53,13 @@ export class FlowEngine {
     
     this.diagramModel = new DiagramModel();
     this.engineImpl.setDiagramModel(this.diagramModel);
+    this.hasSynced = false;
   }
 
   static getEngine(flow: IFlow): FlowEngine {
     const {id} = flow;
     if (!FlowEngine.engines[id]) {
       const newEngine = new FlowEngine(id);
-      newEngine.restoreFlow(flow);
       FlowEngine.engines[id] = new FlowEngine(id);
     }
     return FlowEngine.engines[id];
@@ -78,7 +81,7 @@ export class FlowEngine {
     return node;
   }
 
-  private enforceNode(stepId: string): PintuNodeModel {
+  getNodeRef(stepId: string): PintuNodeModel {
     const result = this.stepNodes[stepId];
     if (!result) {
       throw new TypeError(`Node for step with ID - ${stepId} not found`);
@@ -89,15 +92,10 @@ export class FlowEngine {
   /**
    * @returns true if the step is inserted; false otherwise
    */
-  insertStep(step: IStepConfig, src?: ILinkSource): boolean {
+  insertStep(step: IStepConfig): boolean {
     if (!this.stepNodes[step.id]) {
       const node = this.buildNode(step);
       this.stepNodes[step.id] = node;
-
-      if (src) {
-        const {stepID, actionID} = src;
-      }
-
       this.diagramModel.addNode(node);
       return true;
     } else {
@@ -113,7 +111,11 @@ export class FlowEngine {
     });
   }
 
-  restoreFlow(flow: IFlow) {
+  private restoreFlow(flow: IFlow) {
+    if (this.hasSynced) {
+      return;
+    }
+
     const {
       steps,
       serializedDiagram,
@@ -136,6 +138,19 @@ export class FlowEngine {
         this.restoreLinks(step);
       });
     }
+    this.diagramEngine.repaintCanvas();
+  }
+
+  syncFlow(flow: IFlow) {
+    if (this.hasSynced) {
+      return;
+    }
+
+    this.restoreFlow(flow);
+    this.hasSynced = true;
+  }
+
+  repaintCanvas() {
     this.diagramEngine.repaintCanvas();
   }
 }

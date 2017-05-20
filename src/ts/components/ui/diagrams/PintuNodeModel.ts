@@ -132,10 +132,10 @@ export class PintuNodeModel extends NodeModel {
     return this.getPortModelsByType(PintuActionPortModel);
   }
 
-  getActionPortWithName(actionId: string): PintuActionPortModel | undefined {
+  getActionPortWithID(actionID: string): PintuActionPortModel | undefined {
     const actionPortModels = this.getActionPortModels();
     return actionPortModels.find((portModel) => {
-      return portModel.action.id === actionId;
+      return portModel.action.id === actionID;
     });
   }
 
@@ -164,7 +164,7 @@ export class PintuNodeModel extends NodeModel {
 
     if (destConfig.type === 'step' && destConfig.stepID === destNode.id) {
       // TODO Only support in-flow connection for now, implement in future
-      const srcActionPort = this.getActionPortWithName(actionId);
+      const srcActionPort = this.getActionPortWithID(actionId);
       if (!srcActionPort) {
         throw new TypeError(
           `Action ${actionId} not found in ` 
