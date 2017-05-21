@@ -8,9 +8,11 @@ export class PintuActionPortModel extends PintuBasePortModel {
   get action(): IAction {
     return this._action;
   }
+
+  public portType = 'action';
   
   constructor(action?: IAction) {
-    super('action', 'action');
+    super('action');
     if (action) {
       this.setData(action);
     }

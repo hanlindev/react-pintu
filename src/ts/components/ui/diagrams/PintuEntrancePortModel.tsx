@@ -3,9 +3,9 @@ import {PintuBasePortModel} from './PintuBasePortModel';
 import {ITypeChecker} from '../../../lib';
 
 export class PintuEntrancePortModel extends PintuBasePortModel {
-  
+  public portType = 'entrance';
   constructor() {
-    super('entrance', 'entrance');
+    super('entrance');
   }
 
   getLabel() {

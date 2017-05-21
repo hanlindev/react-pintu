@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
-import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel, LinkInstanceFactory} from 'storm-react-diagrams';
+import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel, LinkInstanceFactory, PortModel} from 'storm-react-diagrams';
+import {Dispatch} from 'react-redux';
 import {PintuNodeWidgetFactory} from '../../components/ui/diagrams/PintuNodeWidget';
 import {PintuNodeModel, PintuNodeInstanceFactory} from '../../components/ui/diagrams/PintuNodeModel';
 import {PintuActionPortFactory} from '../../components/ui/diagrams/PintuActionPortModel';
@@ -8,6 +9,7 @@ import {PintuEntrancePortFactory} from '../../components/ui/diagrams/PintuEntran
 import {ContainerRegistry} from '../ContainerRegistry';
 import {IStepConfig, IFlow, ILinkSource} from '../interfaces';
 import {IFlowEngine} from './interfaces';
+import {DiagramListener} from './listeners/DiagramListener';
 
 /**
  * The StormReactDiagram engine works independently from the BuilderState's
@@ -65,6 +67,14 @@ export class FlowEngine implements IFlowEngine {
     return FlowEngine.engines[id];
   }
 
+  getDiagramEngine(): SRDDiagramEngine {
+    return this.diagramEngine;
+  }
+
+  getDiagramModel(): DiagramModel {
+    return this.diagramModel;
+  }
+
   static setRegistry(registry: ContainerRegistry) {
     if (registry !== FlowEngine.registry) {
       // If this is a new registry, the views will change. The existing
@@ -81,12 +91,20 @@ export class FlowEngine implements IFlowEngine {
     return node;
   }
 
-  getNodeRef(stepId: string): PintuNodeModel {
-    const result = this.stepNodes[stepId];
-    if (!result) {
-      throw new TypeError(`Node for step with ID - ${stepId} not found`);
+  getNodeRef(data: string | PortModel): PintuNodeModel {
+    if (!data) {
+      throw new TypeError('Unable to get node from empty data');
     }
-    return result;
+
+    if (typeof data === 'string') {
+      const result = this.stepNodes[data];
+      if (!result) {
+        throw new TypeError(`Node for step with ID - ${data} not found`);
+      }
+      return result;
+    } else {
+      return data.getParent() as PintuNodeModel;  
+    }
   }
 
   /**
@@ -139,15 +157,11 @@ export class FlowEngine implements IFlowEngine {
       });
     }
     this.diagramEngine.repaintCanvas();
+    this.hasSynced = true;
   }
 
-  syncFlow(flow: IFlow) {
-    if (this.hasSynced) {
-      return;
-    }
-
+  syncFlow(flow: IFlow, dispatch: Dispatch<any>) {
     this.restoreFlow(flow);
-    this.hasSynced = true;
   }
 
   repaintCanvas() {

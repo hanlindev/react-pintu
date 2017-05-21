@@ -1,9 +1,14 @@
 import * as _ from 'lodash';
-import {actions, BuilderActionType} from '../../../reducers/builder';
 import {DiagramEngine, DiagramModel, DiagramEngineListener, DiagramListener as DiagramModelListener, LinkModel} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
 import {LinkListener} from './LinkListener';
-import {LinkAdded} from '../../../lib/FlowEngine/events/LinkAdded';
+import {IDiagramChange} from '../interfaces';
+import {LinkAdded, LinkRemoved} from '../events';
+
+export interface IDiagramEvents {
+  onDiagramChange: (linkChange: IDiagramChange) => void;
+  onSerializeDiagram: (serialized: string) => void;
+}
 
 export class DiagramListener implements DiagramModelListener, DiagramEngineListener {
   static singleInstance: DiagramListener;
@@ -12,7 +17,7 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
 
   private constructor(
     readonly diagramEngine: DiagramEngine,
-    readonly dispatch: Dispatch<BuilderActionType>,
+    readonly events: IDiagramEvents,
   ) {
     this.diagram = diagramEngine.getDiagramModel();
     this.diagramEngine.addListener(this);
@@ -21,18 +26,23 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
 
   private serializeDiagram() {
     const serialized = JSON.stringify(this.diagram.serializeDiagram());
-    this.dispatch(actions.setSerializedDiagram(serialized));
+    this.events.onSerializeDiagram(serialized);
   }
 
   nodesUpdated?(node: any, isCreated: boolean): void {
   }
 
   linksUpdated?(link: LinkModel, isCreated: boolean): void {
-    link.clearListeners();
-    link.addListener(new LinkListener(link, this.dispatch));
-    _.defer(() => {
-      this.dispatch(actions.handleLinkChange(new LinkAdded(link)));
-    });
+    if (isCreated) {
+      link.addListener(new LinkListener(link, this.events));
+      _.defer(() => {
+        this.events.onDiagramChange(new LinkAdded(link));
+      });
+    } else {
+      _.defer(() => {
+        this.events.onDiagramChange(new LinkRemoved(link));
+      })
+    }
   }
 
   offsetUpdated?(model: DiagramModel, offsetX: number, offsetY: number): void {
@@ -56,9 +66,8 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
 
   static register(
     engine: DiagramEngine,
-    dispatch: Dispatch<BuilderActionType>,
+    events: IDiagramEvents,
   ) {
-    DiagramListener.singleInstance = new DiagramListener(engine, dispatch);
-
+    DiagramListener.singleInstance = new DiagramListener(engine, events);
   }
 }

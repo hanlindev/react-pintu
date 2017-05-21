@@ -27,6 +27,10 @@ export interface IStepConfig {
   destinations: {[actionName: string]: IActionDestination};
 }
 
+export interface IStepConfigMap {
+  [stepID: string]: IStepConfig;
+}
+
 export interface IFlow {
   id: string;
   metaData: IFlowMetaData;

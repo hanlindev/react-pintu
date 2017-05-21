@@ -1,15 +1,20 @@
 import {LinkModel, LinkModelListener} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
-import {BuilderActionType} from '../../../reducers/builder';
-import {PintuWireablePortType} from '../../ui/diagrams';
+import {PintuWireablePortType} from '../../../components/ui/diagrams';
+import {IDiagramChange} from '../interfaces';
+import {LinkTargetPortChanged} from '../events/LinkPortChanged';
+
+export interface ILinkEvents {
+  onDiagramChange: (change: IDiagramChange) => void;
+}
 
 export class LinkListener implements LinkModelListener {
   private srcPort: PintuWireablePortType | null;
   private targetPort: PintuWireablePortType | null;
 
   constructor(
-    readonly link: LinkModel, 
-    readonly dispatch: Dispatch<BuilderActionType>
+    readonly link: LinkModel,
+    readonly events: ILinkEvents,
   ) {
     this.srcPort = link.sourcePort as PintuWireablePortType;
     this.targetPort = link.targetPort as PintuWireablePortType;
@@ -24,7 +29,7 @@ export class LinkListener implements LinkModelListener {
     // TODO dispatch linkSourceChanged action.
   }
 
-  targetPortChanged?(item: LinkModel, target: null | PintuWireablePortType): void {
-    // TODO dispatch linkTargetChanged action.
+  targetPortChanged?(item: LinkModel, target: null | PintuWireablePortType) {
+    this.events.onDiagramChange(new LinkTargetPortChanged(item));
   }
 }

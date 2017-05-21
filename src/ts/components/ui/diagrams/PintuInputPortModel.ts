@@ -14,8 +14,10 @@ export class PintuInputPortModel extends PintuBasePortModel {
     return this._type;
   }
 
+  public portType = 'input';
+
   constructor(inputName?: string, type?: TypeCheckerFactory) {
-    super('input', 'input');
+    super('input');
     if (inputName && type) {
       this.setData(inputName, type);
     }

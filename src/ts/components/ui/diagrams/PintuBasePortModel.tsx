@@ -3,11 +3,9 @@ import {PortModel} from 'storm-react-diagrams';
 import {ITypeChecker} from '../../../lib';
 
 export class PintuBasePortModel extends PortModel {
-  get portType(): string {
-    return this._portType;
-  }
+  public portType = 'base';
 
-  constructor(private _portType: string, name: string) {
+  constructor(name: string) {
     super(name);
   }
 
@@ -27,6 +25,6 @@ export class PintuBasePortModel extends PortModel {
 
   deSerialize(data: any) {
     super.deSerialize(data);
-    this._portType = data.portType;
+    this.portType = data.portType;
   }
 }

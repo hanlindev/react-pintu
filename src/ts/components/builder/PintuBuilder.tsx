@@ -6,10 +6,12 @@ import {push} from 'react-router-redux';
 import {DiagramEngine, DiagramModel, DiagramWidget, LinkModel} from 'storm-react-diagrams';
 import CircularProgress from 'material-ui/CircularProgress';
 
-import {DiagramListener} from './listeners/DiagramListener';
 import {IState} from '../../reducers';
-import {actions, BuilderActionType} from '../../reducers/builder';
+import {actions, getDiagramEngine} from '../../reducers/builder/actions';
+import {BuilderActionType} from '../../reducers/builder/common';
+
 import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
+import {safe} from '../../lib/utils';
 
 import 'storm-react-diagrams/src/sass.scss';
 import '../../../scss/builder/main.scss';
@@ -20,7 +22,7 @@ interface IParams {
 
 interface IFlowCanvas {
   flow: IFlow;
-  flowEngine: FlowEngine;
+  diagramEngine: DiagramEngine;
 }
 export interface IPintuBuilderProps {
   dispatch: Dispatch<BuilderActionType>;
@@ -69,18 +71,9 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     return null;
   }
 
-  private getFlowEngine(
-    flowCanvas: IFlowCanvas | undefined,
-  ): FlowEngine | null {
-    if (flowCanvas) {
-      return flowCanvas.flowEngine;
-    }
-    return null;
-  }
-
   private async loadFlowData(flowID: string) {
     const flowData = await this.props.onLoadFlow(flowID);
-    this.props.dispatch(actions.setFlow(flowData));
+    this.props.dispatch(actions.syncNewFlow(flowData));
   }
 
   private async createFlow(flowData: IFlowMetaData) {
@@ -89,26 +82,10 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     dispatch(push(`/builder/${flowID}`));
   }
 
-  private syncNewEngine(
-    flowCanvas: IFlowCanvas,
-  ) {
-    const {dispatch} = this.props;
-    const {flow, flowEngine} = flowCanvas;
-    flowEngine.syncFlow(flow);
-    DiagramListener.register(flowEngine.diagramEngine, dispatch);
-  }
-
   private serializeDiagram() {
     const {flowCanvas} = this.props;
-    if (!flowCanvas) {
-      return;
-    }
-
-    const {flowEngine} = flowCanvas;
-    const diagramModel = this.getDiagramModel(flowEngine);
-    if (diagramModel) {
-      const serializeDiagram = JSON.stringify(diagramModel.serializeDiagram());
-      this.props.dispatch(actions.setSerializedDiagram(serializeDiagram));
+    if (flowCanvas) {
+      this.props.dispatch(actions.saveDiagram(flowCanvas.flow));
     }
   }
 
@@ -120,8 +97,6 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     if (flowID) {
       this.loadFlowData(flowID);
     }
-
-    flowCanvas && this.syncNewEngine(flowCanvas);
   }
 
   componentWillReceiveProps(nextProps: IPintuBuilderProps) {
@@ -133,20 +108,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     if (flowID && flowID !== this.props.params.flowID) {
       this.loadFlowData(flowID);
     }
-    flowCanvas && this.syncNewEngine(flowCanvas);
-    
-    const nextFlow = this.getFlowData(flowCanvas);
-    const thisFlow = this.getFlowData(this.props.flowCanvas);
-    if (nextFlow && !_.isEqual(nextFlow, thisFlow)) {
-      onAutoSaveFlow && onAutoSaveFlow(nextFlow);
-    }
-  }
 
-  componentDidUpdate(prevProps: IPintuBuilderProps) {
-    const prevFlowEngine = this.getFlowEngine(prevProps.flowCanvas);
-    const currentFlowEngine = this.getFlowEngine(this.props.flowCanvas);
-    if (this.props.flowCanvas && currentFlowEngine !== prevFlowEngine) {
-      this.syncNewEngine(this.props.flowCanvas);
+    const currentFlow = safe(this.props.flowCanvas).flow;
+    const nextFlow = safe(flowCanvas).flow;
+    if (nextFlow && !_.isEqual(currentFlow, nextFlow)) {
+      onAutoSaveFlow(nextFlow);
     }
   }
 
@@ -201,8 +167,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
 
   render() {
     const {flowCanvas} = this.props;
-    const diagramEngine = this.getDiagramEngine(this.getFlowEngine(flowCanvas));
-    if (!diagramEngine) {
+    if (!flowCanvas) {
       return (
         <div 
           style={{
@@ -233,7 +198,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           style={this._getCanvasStyle()}
         >
           <DiagramWidget
-            diagramEngine={diagramEngine} 
+            diagramEngine={flowCanvas.diagramEngine} 
           />
         </div>
         <div style={this._getConfigurationTrayStyle()}>
@@ -251,13 +216,13 @@ export function createBuilder(
   FlowEngine.setRegistry(registry);
   return connect((state: IState) => {
     const flow = state.builder.getFlowClone();
-    const flowEngine = (flow) ? state.builder.getFlowEngine() : null;
+    const diagramEngine = (flow) ? getDiagramEngine(flow) : null;
     let flowCanvas = {};
-    if (flow && flowEngine) {
+    if (flow && diagramEngine) {
       flowCanvas = {
         flowCanvas: {
           flow,
-          flowEngine,
+          diagramEngine,
         },
       };
     }
