@@ -3,6 +3,7 @@ import {StatelessComponent} from 'react';
 import {IInputsDeclaration, IActionsDeclaration} from './interfaces';
 
 import {safe} from './utils';
+import {LogicContainer} from './LogicContainer';
 
 export interface IContainerSpec {
   name: string;
@@ -11,17 +12,26 @@ export interface IContainerSpec {
   pathTemplate: string;
 }
 
+export interface IContainerSpecMap {
+  [key: string]: IContainerSpec;
+}
+
+type ComponentClass = React.ComponentClass<any> | LogicContainer<any>;
+
 export class ContainerRegistry {
   private containers: {[key: string]: IContainerSpec} = {};
   // Path to container name map to prevent and warn duplicate registrations.
   private registeredPaths: {[key: string]: string} = {};
-  private registeredComponents: {[key: string]: React.ComponentClass<any>} = {};
+  private registeredComponents: {[key: string]: ComponentClass} = {};
 
   get registeredContainers(): {[key: string]: IContainerSpec} {
     return this.containers;
   }
 
-  register(container: IContainerSpec): IContainerSpec {
+  register(
+    container: IContainerSpec, 
+    componentClass?: ComponentClass | LogicContainer<any>
+  ): IContainerSpec {
     const {
       name,
       pathTemplate
@@ -44,11 +54,12 @@ export class ContainerRegistry {
     }
 
     this.registeredPaths[pathTemplate] = name;
+    componentClass && (this.registeredComponents[name] = componentClass);
     this.containers[name] = container;
     return container;
   }
 
-  getComponent(name: string): React.ComponentClass<any> | undefined {
+  getComponent(name: string): ComponentClass | undefined {
     return this.registeredComponents[name];
   }
 

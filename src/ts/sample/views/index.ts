@@ -5,12 +5,12 @@ import {SampleView} from './SampleView';
 
 const registry = new ContainerRegistry();
 
-const containers: Array<IContainerSpec> = [
-  SampleView.container,
+const containers: Array<[IContainerSpec, React.ComponentClass<any>]> = [
+  [SampleView.container, SampleView],
 ];
 
-containers.forEach((container) => {
-  registry.register(container);
+containers.forEach((spec) => {
+  registry.register(spec[0], spec[1]);
 });
 
 export {

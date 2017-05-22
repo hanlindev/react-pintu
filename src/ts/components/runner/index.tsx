@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
 import {IContainerSpec, ContainerRegistry} from '../../lib/ContainerRegistry';
+import {LogicContainer} from '../../lib/LogicContainer';
 import {IState} from '../../reducers';
 import {IPintuRunnerProps} from './props';
 import {LogicRunner} from './LogicRunner';
@@ -12,7 +13,15 @@ export function createRunner(
 ): React.ComponentClass<IPintuRunnerProps> {
   function _PintuRunner(props: IPintuRunnerProps): JSX.Element {
     const component = registry.getComponent(container.name);
-    if (component) {
+    if (component instanceof LogicContainer) {
+      return (
+        <LogicRunner 
+          container={{...container}} 
+          logic={component}
+          {...props} 
+        />
+      );
+    } else if (component) {
       return (
         <UIRunner 
           container={{
@@ -23,7 +32,11 @@ export function createRunner(
         />
       );
     } else {
-      return <LogicRunner container={container} {...props} />;
+      return (
+        <div>
+          TODO Error
+        </div>
+      )
     }
   }
 

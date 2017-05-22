@@ -11,6 +11,8 @@ import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
 import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
+import {ContextPopover} from '../ui/ContextPopover';
+import {ContainerSelector} from '../ui/ContainerSelector';
 import {safe} from '../../lib/utils';
 
 import 'storm-react-diagrams/src/sass.scss';
@@ -32,10 +34,12 @@ export interface IPintuBuilderProps {
   onAutoSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   onUserSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   params: IParams;
+  registry: ContainerRegistry;
 }
 
 interface IPintuBuilderState {
   isMovingCanvas: boolean;
+  newNodeMenuPosition?: {top: number, left: number};
 }
 
 class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderState> {
@@ -150,6 +154,15 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     // TODO differentiate long click vs short click 
     // (so after dragging, don't show context)
     e.preventDefault();
+    const {screenX, screenY} = e;
+    this.setNewNodeMenuPosition({
+      top: screenY,
+      left: screenX,
+    });
+  }
+
+  private dismissNewNodeMenu() {
+    this.setState({newNodeMenuPosition: undefined});
   }
 
   _onMouseDownCanvas(e: React.MouseEvent<any>) {
@@ -165,8 +178,20 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.serializeDiagram();
   }
 
+  private setNewNodeMenuPosition({top, left}: {top: number, left: number}) {
+    this.setState({
+      newNodeMenuPosition: {
+        top: top - 70,
+        left: left - 10,
+      },
+    });
+  }
+
   render() {
-    const {flowCanvas} = this.props;
+    const {
+      flowCanvas,
+      registry,
+    } = this.props;
     if (!flowCanvas) {
       return (
         <div 
@@ -193,10 +218,17 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       >
         <div 
           onContextMenu={(e) => this._onRightClickCanvas(e)}
+          onClick={() => this.dismissNewNodeMenu()}
           onMouseDown={(e) => this._onMouseDownCanvas(e)}
           onMouseUp={(e) => this._onMouseUpCanvas(e)}
           style={this._getCanvasStyle()}
         >
+          <ContextPopover
+            show={true}
+            position={this.state.newNodeMenuPosition}
+          >
+            <ContainerSelector registry={registry} />
+          </ContextPopover>
           <DiagramWidget
             diagramEngine={flowCanvas.diagramEngine} 
           />
@@ -229,6 +261,7 @@ export function createBuilder(
     return {
       ...eventHandlers,
       ...flowCanvas,
+      registry,
     };
   })(PintuBuilder);
 }
