@@ -24,3 +24,10 @@ export interface IDiagramChange {
   isValid(engine: IFlowEngine): boolean;
   reject(engine: IFlowEngine): void;
 }
+
+/**
+ * Diagram triggers trigger storm-react-diagram events.
+ */
+export interface IDiagramTrigger {
+  trigger(engine: DiagramEngine): void;
+}

@@ -3,7 +3,7 @@ import {DiagramEngine, DiagramModel, DiagramEngineListener, DiagramListener as D
 import {Dispatch} from 'react-redux';
 import {LinkListener} from './LinkListener';
 import {IDiagramChange} from '../interfaces';
-import {LinkAdded, LinkRemoved} from '../events';
+import {LinkAdded, LinkRemoved, NodeAdded, NodeRemoved} from '../builderEvents';
 
 export interface IDiagramEvents {
   onDiagramChange: (linkChange: IDiagramChange) => void;
@@ -30,6 +30,11 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
   }
 
   nodesUpdated?(node: any, isCreated: boolean): void {
+    if (isCreated) {
+      this.events.onDiagramChange(new NodeAdded(node));
+    } else {
+      this.events.onDiagramChange(new NodeRemoved(node));
+    }
   }
 
   linksUpdated?(link: LinkModel, isCreated: boolean): void {

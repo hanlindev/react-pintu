@@ -2,7 +2,7 @@ import {LinkModel, LinkModelListener} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
 import {PintuWireablePortType} from '../../../components/ui/diagrams';
 import {IDiagramChange} from '../interfaces';
-import {LinkTargetPortChanged} from '../events/LinkPortChanged';
+import {LinkTargetPortChanged} from '../builderEvents/LinkPortChanged';
 
 export interface ILinkEvents {
   onDiagramChange: (change: IDiagramChange) => void;

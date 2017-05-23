@@ -16,3 +16,18 @@ export interface IAction {
 export interface IActionsDeclaration {
   [key: string]: IAction;
 }
+
+export interface IActionCallback {
+  (actionID: string, payload: any): any;
+}
+
+export interface IContainerSpec {
+  name: string;
+  inputs: IInputsDeclaration;
+  actions: IActionsDeclaration;
+  pathTemplate: string;
+}
+
+export interface IContainerSpecMap {
+  [key: string]: IContainerSpec;
+}

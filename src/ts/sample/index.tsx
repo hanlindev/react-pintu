@@ -3,7 +3,9 @@ import * as ReactDOM from 'react-dom';
 import {AppWrapper} from './AppWrapper';
 import {IThemeCustomization} from '../components/ui';
 import {PintuProvider} from '../.';
-import {registry} from './views';
+import {ContainerRegistry} from '../lib/ContainerRegistry';
+import {registry as viewRegistry} from './views';
+import {registry as logicRegistry} from './logics';
 import * as SampleServerAPI from './SampleServerAPI';
 
 
@@ -14,7 +16,10 @@ class PintuSample extends React.Component<{}, void> {
         builderUrlPrefix="/builder"
         canUseBuilder={true}
         appWrapper={AppWrapper}
-        containerRegistry={registry}
+        containerRegistry={ContainerRegistry.combineRegistries(
+          viewRegistry,
+          logicRegistry,
+        )}
         builderEventHandlers={SampleServerAPI}
       />
     );

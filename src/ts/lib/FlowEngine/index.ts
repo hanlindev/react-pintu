@@ -85,7 +85,7 @@ export class FlowEngine implements IFlowEngine {
   }
 
   private buildNode(step: IStepConfig) {
-    const container = FlowEngine.registry.getContainer(step.containerName);
+    const container = FlowEngine.registry.getContainerSpec(step.containerName);
     const node = new PintuNodeModel(step, container);
     // TODO position the node if not automatically positioned.
     return node;

@@ -4,8 +4,8 @@ import {Popover} from 'material-ui';
 import {ThemeableComponent} from './ThemeableComponent';
 
 interface IPosition {
-  top: number;
-  left: number;
+  x: number;
+  y: number;
 }
 
 interface IContextPopoverProps {
@@ -28,10 +28,17 @@ export class ContextPopover
     const {
       position,
     } = this.props;
+    let coordinates = {};
+    if (position) {
+      coordinates = {
+        top: position.y,
+        left: position.x,
+      };
+    }
 
     return {
       position: 'fixed',
-      ...position,
+      ...coordinates,
       zIndex: 2000,
     }
   }

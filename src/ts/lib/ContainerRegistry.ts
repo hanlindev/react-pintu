@@ -1,22 +1,12 @@
 import * as _ from 'lodash';
 import {StatelessComponent} from 'react';
-import {IInputsDeclaration, IActionsDeclaration} from './interfaces';
+import {IInputsDeclaration, IActionsDeclaration, IContainerSpec} from './interfaces';
 
 import {safe} from './utils';
 import {LogicContainer} from './LogicContainer';
+import {UIContainer} from './UIContainer';
 
-export interface IContainerSpec {
-  name: string;
-  inputs: IInputsDeclaration;
-  actions: IActionsDeclaration;
-  pathTemplate: string;
-}
-
-export interface IContainerSpecMap {
-  [key: string]: IContainerSpec;
-}
-
-type ComponentClass = React.ComponentClass<any> | LogicContainer<any>;
+type ComponentClass = LogicContainer<any> | UIContainer;
 
 export class ContainerRegistry {
   private containers: {[key: string]: IContainerSpec} = {};
@@ -24,13 +14,13 @@ export class ContainerRegistry {
   private registeredPaths: {[key: string]: string} = {};
   private registeredComponents: {[key: string]: ComponentClass} = {};
 
-  get registeredContainers(): {[key: string]: IContainerSpec} {
+  get containerSpecs(): {[key: string]: IContainerSpec} {
     return this.containers;
   }
 
   register(
     container: IContainerSpec, 
-    componentClass?: ComponentClass | LogicContainer<any>
+    componentClass: ComponentClass | LogicContainer<any>
   ): IContainerSpec {
     const {
       name,
@@ -45,33 +35,35 @@ export class ContainerRegistry {
       );
     }
 
-    let registered = this.getComponent(name);
+    let registered = this.getContainer(name);
     if (registered) {
       throw new TypeError(
         `Name ${name} already registered by `
-        + `component ${registered.name}`,
+        + `component ${registered.constructor.name}`,
       );
     }
 
     this.registeredPaths[pathTemplate] = name;
-    componentClass && (this.registeredComponents[name] = componentClass);
+    this.registeredComponents[name] = componentClass;
     this.containers[name] = container;
     return container;
   }
 
-  getComponent(name: string): ComponentClass | undefined {
+  getContainer(name: string): ComponentClass {
     return this.registeredComponents[name];
   }
 
-  getContainer(name: string): IContainerSpec {
+  getContainerSpec(name: string): IContainerSpec {
     return this.containers[name];
   }
 
-  static combineRegistries(...registries: Array<ContainerRegistry>): ContainerRegistry {
+  static combineRegistries(
+    ...registries: Array<ContainerRegistry>
+  ): ContainerRegistry {
     const result = new ContainerRegistry();
     registries.forEach((registry) => {
-      _.forEach(registry.registeredContainers, (container) => {
-        result.register(container);
+      _.forEach(registry.containerSpecs, (container) => {
+        result.register(container, registry.getContainer(container.name));
       });
     });
     return result;

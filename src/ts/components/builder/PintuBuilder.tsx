@@ -39,7 +39,7 @@ export interface IPintuBuilderProps {
 
 interface IPintuBuilderState {
   isMovingCanvas: boolean;
-  newNodeMenuPosition?: {top: number, left: number};
+  newNodeMenuPosition?: {y: number, x: number};
 }
 
 class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderState> {
@@ -156,8 +156,8 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     e.preventDefault();
     const {screenX, screenY} = e;
     this.setNewNodeMenuPosition({
-      top: screenY,
-      left: screenX,
+      y: screenY,
+      x: screenX,
     });
   }
 
@@ -178,11 +178,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.serializeDiagram();
   }
 
-  private setNewNodeMenuPosition({top, left}: {top: number, left: number}) {
+  private setNewNodeMenuPosition({y, x}: {y: number, x: number}) {
     this.setState({
       newNodeMenuPosition: {
-        top: top - 70,
-        left: left - 10,
+        y: y - 70,
+        x: x - 10,
       },
     });
   }
@@ -192,6 +192,9 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       flowCanvas,
       registry,
     } = this.props;
+    const {
+      newNodeMenuPosition,
+    } = this.state;
     if (!flowCanvas) {
       return (
         <div 
@@ -225,9 +228,15 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
         >
           <ContextPopover
             show={true}
-            position={this.state.newNodeMenuPosition}
+            position={newNodeMenuPosition}
           >
-            <ContainerSelector registry={registry} />
+            <ContainerSelector 
+              registry={registry}
+              flow={flowCanvas.flow}
+              engine={flowCanvas.diagramEngine}
+              newNodePosition={newNodeMenuPosition}
+              onRequestClose={() => this.dismissNewNodeMenu()}
+            />
           </ContextPopover>
           <DiagramWidget
             diagramEngine={flowCanvas.diagramEngine} 

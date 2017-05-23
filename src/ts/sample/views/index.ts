@@ -1,16 +1,22 @@
 import * as React from 'react';
 
-import {ContainerRegistry, IContainerSpec} from '../../lib/ContainerRegistry';
+import {ContainerRegistry} from '../../lib/ContainerRegistry';
+import {UIContainer} from '../../lib/UIContainer';
+import {IContainerSpec} from '../../lib/interfaces';
 import {SampleView} from './SampleView';
 
 const registry = new ContainerRegistry();
 
-const containers: Array<[IContainerSpec, React.ComponentClass<any>]> = [
-  [SampleView.container, SampleView],
+const containers: Array<UIContainer> = [
+  new SampleView(),
 ];
 
-containers.forEach((spec) => {
-  registry.register(spec[0], spec[1]);
+containers.forEach(async (view) => {
+  let containerSpec = view.getContainerSpec();
+  if (containerSpec instanceof Promise) {
+    containerSpec = await containerSpec;
+  }
+  registry.register(containerSpec, view);
 });
 
 export {

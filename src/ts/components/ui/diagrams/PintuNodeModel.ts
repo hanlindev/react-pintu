@@ -3,9 +3,8 @@ import {AbstractInstanceFactory, DiagramModel, LinkModel, NodeModel, PortModel} 
 import {PintuInputPortModel} from './PintuInputPortModel';
 import {PintuActionPortModel} from './PintuActionPortModel';
 import {PintuEntrancePortModel} from './PintuEntrancePortModel';
-import {IStepConfig, IActionsDeclaration} from '../../../lib/interfaces';
+import {IStepConfig, IActionsDeclaration, IContainerSpec} from '../../../lib/interfaces';
 import {preparePayloadDeclarationSerialize, deSerializePayloadDeclaration} from '../../../lib/types';
-import {IContainerSpec} from '../../../lib/ContainerRegistry';
 
 export class PintuNodeModel extends NodeModel {
   private _config: IStepConfig;

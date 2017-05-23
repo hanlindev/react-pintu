@@ -55,7 +55,7 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
       containerRegistry,
     } = this.props;
     const routes = _.map(
-      containerRegistry.registeredContainers,
+      containerRegistry.containerSpecs,
       (spec, name) => {
         return (
           <Route 

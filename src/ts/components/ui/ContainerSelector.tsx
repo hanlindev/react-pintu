@@ -3,17 +3,31 @@ import * as React from 'react';
 import * as Radium from 'radium';
 import * as tinycolor from 'tinycolor2';
 import {CSSProperties} from 'react';
+import {DiagramEngine} from 'storm-react-diagrams';
 import {ScrollableArea} from './ScrollableArea';
 import {ThemeableComponent} from './ThemeableComponent';
-import {ContainerRegistry, IContainerSpec, IContainerSpecMap} from '../../lib/ContainerRegistry';
+import {ContainerRegistry} from '../../lib/ContainerRegistry';
+import {IContainerSpec, IContainerSpecMap, IFlow} from '../../lib/interfaces';
+import {UIContainer, LogicContainer} from '../../lib';
+import {AddNode} from '../../lib/FlowEngine/diagramTriggers';
+import {camelToWords} from '../../lib/utils';
 
 const FONT_SIZE = 11;
 const COLOR = 'rgb(249, 249, 249)';
 const BACKGROUND_COLOR = 'rgb(64, 65, 66)';
 
+interface IPosition {
+  x: number;
+  y: number;
+}
+
 interface IContainerSelectorProps {
+  flow: IFlow;
   height?: number;
   registry: ContainerRegistry;
+  engine: DiagramEngine;
+  newNodePosition?: IPosition;
+  onRequestClose?: () => any;
 }
 
 interface IContainerSelectorState {
@@ -25,6 +39,10 @@ class _ContainerSelector
 
   static defaultProps = {
     height: 300,
+    position: {
+      x: 0,
+      y: 0,
+    },
   };
 
   state: IContainerSelectorState;
@@ -40,7 +58,7 @@ class _ContainerSelector
     return {
       backgroundColor: BACKGROUND_COLOR,
       border: '1px solid black',
-      borderRadius: 2,
+      borderRadius: 5,
       paddingTop: tiny,
     };
   }
@@ -65,15 +83,16 @@ class _ContainerSelector
     const {
       theme: {
         spacing: {
-          tiny,
           small,
         },
       },
     } = this.context;
+
     return {
       color: COLOR,
       fontSize: FONT_SIZE,
-      padding: `${tiny}px ${small}px`,
+      marginTop: small,
+      height: 16,
       ':hover': {
         cursor: 'pointer',
         backgroundColor: tinycolor(BACKGROUND_COLOR).lighten(20).toHexString(),
@@ -101,9 +120,20 @@ class _ContainerSelector
     }
   }
 
-  private getSearchInputStyle(): CSSProperties {
-    return {
-    };
+  private onSelectContainer(containerSpec: IContainerSpec) {
+    const {
+      engine,
+      flow,
+      newNodePosition,
+      onRequestClose,
+    } = this.props;
+    const trigger = new AddNode(
+      containerSpec, 
+      flow, 
+      newNodePosition as IPosition,
+    );
+    trigger.trigger(engine);
+    onRequestClose && onRequestClose();
   }
 
   render() {
@@ -114,10 +144,10 @@ class _ContainerSelector
         style={this.getRootStyle()}
         onClick={(e) => e.stopPropagation()}
       >
+        {this.renderSearchInput()}
         <ScrollableArea
           height={height as number}
         >
-          {this.renderSearchInput()}
           {this.renderContent()}
         </ScrollableArea>
       </div>
@@ -126,7 +156,7 @@ class _ContainerSelector
 
   private getContainers(): IContainerSpecMap {
     const {search} = this.state;
-    const containers = this.props.registry.registeredContainers;
+    const containers = this.props.registry.containerSpecs;
     const filteredKeys = Object.keys(containers).filter((key) => {
       return !search || key.startsWith(search);
     });
@@ -141,6 +171,7 @@ class _ContainerSelector
       theme: {
         spacing: {
           tiny,
+          small,
         },
       },
     } = this.context;
@@ -148,7 +179,7 @@ class _ContainerSelector
     return (
       <div
         style={{
-          padding: `0 ${tiny}px`,
+          padding: `0 ${small}px`,
         }}
       >
         <input
@@ -171,15 +202,44 @@ class _ContainerSelector
   }
 
   private renderContent() {
+    const {
+      theme: {
+        spacing: {
+          tiny,
+        },
+      },
+    } = this.context;
+
     const containers = this.getContainers();
     const content = Object.keys(containers).sort().map((name) => {
-      const container = containers[name];
+      const containerSpec = containers[name];
+      const container = this.props.registry.getContainer(name);
+      let containerType;
+      if (container instanceof UIContainer) {
+        containerType = 'U';
+      } else if (container instanceof LogicContainer) {
+        containerType = 'L';
+      } else {
+        containerType = '?';
+      }
       return (
         <div
           key={name}
+          onClick={() => this.onSelectContainer(containerSpec)}
           style={this.getListItemStyle()}
         >
-          {name}
+          <span
+            style={{
+              border: `1px solid ${COLOR}`,
+              borderRadius: 2,
+              fontSize: 8,
+              padding: 2,
+              marginRight: tiny,
+            }}
+          >
+            {containerType}
+          </span>
+          {camelToWords(name)}
         </div>
       );
     });
