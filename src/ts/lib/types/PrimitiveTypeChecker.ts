@@ -43,6 +43,10 @@ export class PrimitiveTypeChecker implements ITypeChecker {
     );
   }
 
+  isRequired(): boolean {
+    return this.required;
+  }
+
   toPropType(): ReactPropType {
     let result;
     switch (this._type) {

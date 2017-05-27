@@ -1,12 +1,12 @@
 import {AbstractInstanceFactory, PortModel} from 'storm-react-diagrams';
 import {TypeCheckerFactory} from '../../../lib/interfaces';
 import {deSerializeTypeDeclaration} from '../../../lib/types';
-import {PintuBasePortModel} from './PintuBasePortModel';
+import {BasePortModel} from './BasePortModel';
 
-export class PintuInputPortModel extends PintuBasePortModel {
-  private _inputName: string;
-  get inputName(): string {
-    return this._inputName;
+export class InputPortModel extends BasePortModel {
+  private _argName: string;
+  get argName(): string {
+    return this._argName;
   }
 
   private _type: TypeCheckerFactory;
@@ -25,18 +25,18 @@ export class PintuInputPortModel extends PintuBasePortModel {
 
   setData(inputName: string, type: TypeCheckerFactory) {
     this.name = inputName;
-    this._inputName = inputName;
+    this._argName = inputName;
     this._type = type;
   }
 
   getLabel() {
-    return this._inputName;
+    return this._argName;
   }
 
   serialize() {
     return {
       ...super.serialize(),
-      inputName: this._inputName,
+      inputName: this._argName,
       typeImpl: this._type(),
     };
   }
@@ -53,12 +53,12 @@ export class PintuInputPortModel extends PintuBasePortModel {
   }
 }
 
-export class PintuInputPortFactory extends AbstractInstanceFactory<PintuInputPortModel> {
+export class InputPortFactory extends AbstractInstanceFactory<InputPortModel> {
   constructor() {
-    super('PintuInputPortModel');
+    super('InputPortModel');
   }
 
   getInstance() {
-    return new PintuInputPortModel();
+    return new InputPortModel();
   }
 }

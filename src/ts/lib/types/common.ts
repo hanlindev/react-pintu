@@ -6,6 +6,6 @@ export function makeFactory(
   required: ITypeChecker,
 ): Requireable {
   const result: any = () => optional;
-  result.required = () => required;
+  result.isRequired = () => required;
   return result as Requireable;
 }

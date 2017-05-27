@@ -39,29 +39,21 @@ export class SampleView extends UIContainer {
       name: 'SampleView',
       pathTemplate: '/sample',
       inputs: {
-        testString: Types.string,
-        testArray: Types.array,
+        testString: Types.string.isRequired,
+        testArray: Types.array.isRequired,
         typeObject: Types.object,
         testNumber: Types.number,
         testBool: Types.bool,
       },
       actions: {
-        testAction1: {
-          id: 'testAction1',
-          label: 'Test Action 1',
+        testAction: {
+          id: 'testAction',
+          label: 'Test Action',
           type: 'endOfStep',
           payload: {
             strArg: Types.string,
           }
         },
-        testAction2: {
-          id: 'testAction2',
-          label: 'Test Action 2',
-          type: 'intermediate',
-          payload: {
-            numArg: Types.number,
-          },
-        }
       },
     };
   }

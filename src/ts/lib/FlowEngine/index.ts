@@ -1,15 +1,17 @@
 import * as _ from 'lodash';
 import {DefaultLinkFactory, DiagramEngine as SRDDiagramEngine, DiagramModel, LinkModel, LinkInstanceFactory, PortModel} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
-import {PintuNodeWidgetFactory} from '../../components/ui/diagrams/PintuNodeWidget';
-import {PintuNodeModel, PintuNodeInstanceFactory} from '../../components/ui/diagrams/PintuNodeModel';
-import {PintuActionPortFactory} from '../../components/ui/diagrams/PintuActionPortModel';
-import {PintuInputPortFactory} from '../../components/ui/diagrams/PintuInputPortModel';
-import {PintuEntrancePortFactory} from '../../components/ui/diagrams/PintuEntrancePortModel';
+import {NodeWidgetFactory} from '../../components/ui/diagrams/nodeWidgets/NodeWidget';
+import {NodeModel, NodeInstanceFactory} from '../../components/ui/diagrams/NodeModel';
+import {ActionPortFactory} from '../../components/ui/diagrams/ActionPortModel';
+import {InputPortFactory} from '../../components/ui/diagrams/InputPortModel';
+import {EntrancePortFactory} from '../../components/ui/diagrams/EntrancePortModel';
+import {OutputPortFactory} from '../../components/ui/diagrams/OutputPortModel';
 import {ContainerRegistry} from '../ContainerRegistry';
 import {IStepConfig, IFlow, ILinkSource} from '../interfaces';
 import {IFlowEngine} from './interfaces';
 import {DiagramListener} from './listeners/DiagramListener';
+import {BaseContainer} from '../BaseContainer';
 
 /**
  * The StormReactDiagram engine works independently from the BuilderState's
@@ -31,7 +33,7 @@ export class FlowEngine implements IFlowEngine {
 
   private hasSynced: boolean;
 
-  stepNodes: {[id: string]: PintuNodeModel} = {};
+  stepNodes: {[id: string]: NodeModel} = {};
   engineImpl: SRDDiagramEngine;
   diagramModel: DiagramModel;
 
@@ -45,12 +47,13 @@ export class FlowEngine implements IFlowEngine {
     }
 
     this.engineImpl = new SRDDiagramEngine();
-    this.engineImpl.registerInstanceFactory(new PintuNodeInstanceFactory());
-    this.engineImpl.registerInstanceFactory(new PintuInputPortFactory());
-    this.engineImpl.registerInstanceFactory(new PintuActionPortFactory());
-    this.engineImpl.registerInstanceFactory(new PintuEntrancePortFactory());
+    this.engineImpl.registerInstanceFactory(new NodeInstanceFactory());
+    this.engineImpl.registerInstanceFactory(new InputPortFactory());
+    this.engineImpl.registerInstanceFactory(new ActionPortFactory());
+    this.engineImpl.registerInstanceFactory(new EntrancePortFactory());
+    this.engineImpl.registerInstanceFactory(new OutputPortFactory());
     this.engineImpl.registerInstanceFactory(new LinkInstanceFactory());
-    this.engineImpl.registerNodeFactory(new PintuNodeWidgetFactory());
+    this.engineImpl.registerNodeFactory(new NodeWidgetFactory());
     this.engineImpl.registerLinkFactory(new DefaultLinkFactory());
     
     this.diagramModel = new DiagramModel();
@@ -86,12 +89,12 @@ export class FlowEngine implements IFlowEngine {
 
   private buildNode(step: IStepConfig) {
     const container = FlowEngine.registry.getContainerSpec(step.containerName);
-    const node = new PintuNodeModel(step, container);
+    const node = new NodeModel(step, container);
     // TODO position the node if not automatically positioned.
     return node;
   }
 
-  getNodeRef(data: string | PortModel): PintuNodeModel {
+  getNodeRef(data: string | PortModel): NodeModel {
     if (!data) {
       throw new TypeError('Unable to get node from empty data');
     }
@@ -103,8 +106,12 @@ export class FlowEngine implements IFlowEngine {
       }
       return result;
     } else {
-      return data.getParent() as PintuNodeModel;  
+      return data.getParent() as NodeModel;  
     }
+  }
+
+  getContainer(name: string): BaseContainer {
+    return FlowEngine.registry.getContainer(name);
   }
 
   /**
@@ -121,7 +128,7 @@ export class FlowEngine implements IFlowEngine {
     }
   }
 
-  restoreLinks(destNode: PintuNodeModel) {
+  restoreLinks(destNode: NodeModel) {
     _.forEach(this.stepNodes, (node) => {
       Object.keys(node.config.destinations).forEach((actionName: string) => {
         node.tryRestoreLink(actionName, destNode, this.diagramModel);
@@ -146,7 +153,7 @@ export class FlowEngine implements IFlowEngine {
         this.engineImpl
       );
       this.stepNodes = 
-        this.diagramModel.getNodes() as {[key: string]: PintuNodeModel};
+        this.diagramModel.getNodes() as {[key: string]: NodeModel};
       // Links are restored by the engine, no need to call this.restoreLinks.
     } else {
       _.forEach(steps, (step) => {

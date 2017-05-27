@@ -1,16 +1,18 @@
 import {DiagramEngine, DiagramModel, PortModel} from 'storm-react-diagrams';
-import {PintuNodeModel} from '../../components/ui/diagrams/PintuNodeModel';
-import {IStepConfig} from '../interfaces/flow';
-import {PintuWireablePortType} from '../../components/ui/diagrams';
+import {NodeModel} from '../../components/ui/diagrams/NodeModel';
+import {IStepConfigMapChange} from '../interfaces/flow';
+import {WireablePortType} from '../../components/ui/diagrams';
+import {BaseContainer} from '../BaseContainer';
 
 export interface IFlowEngine {
   // Get the reference of the node model so the link change
   // event can modify the data.
-  getNodeRef(stepID: string): PintuNodeModel;
-  getNodeRef(port: PortModel): PintuNodeModel;
+  getNodeRef(stepID: string): NodeModel;
+  getNodeRef(port: PortModel): NodeModel;
   repaintCanvas(): void;
   getDiagramEngine(): DiagramEngine;
   getDiagramModel(): DiagramModel;
+  getContainer(name: string): BaseContainer;
 }
 
 export interface IDiagramChange {
@@ -20,8 +22,9 @@ export interface IDiagramChange {
    * 
    * @returns The changed step configs as a map: id -> config.
    */
-  accept(engine: IFlowEngine): {[key: string]: IStepConfig};
-  isValid(engine: IFlowEngine): boolean;
+  accept(engine: IFlowEngine): IStepConfigMapChange;
+  getInvalidReason(): string | null;
+  validate(engine: IFlowEngine): boolean;
   reject(engine: IFlowEngine): void;
 }
 

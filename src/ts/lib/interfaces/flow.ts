@@ -10,6 +10,13 @@ export type IActionDestination =
   stepID: string,
 }
 
+export interface ISourceSpec {
+  linkID: string;
+  stepID: string;
+  containerName: string;
+  actionID: string;
+}
+
 export interface ILinkSource {
   stepID: string;
   actionID: string;
@@ -24,11 +31,16 @@ export interface IStepConfig {
   id: string;
   // The name of the container in ContainerRegistry
   containerName: string;
+  sources: Array<ISourceSpec>,
   destinations: {[actionName: string]: IActionDestination};
 }
 
 export interface IStepConfigMap {
   [stepID: string]: IStepConfig;
+}
+
+export interface IStepConfigMapChange {
+  [stepID: string]: IStepConfig | null,
 }
 
 export interface IFlow {

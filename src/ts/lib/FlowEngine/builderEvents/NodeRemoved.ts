@@ -1,24 +1,27 @@
-import {PintuNodeModel} from '../../../components/ui/diagrams';
-import {IStepConfigMap} from '../../interfaces/flow';
+import {NodeModel} from '../../../components/ui/diagrams';
+import {IStepConfigMapChange} from '../../interfaces/flow';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
 
 export class NodeRemoved implements IDiagramChange {
   constructor(
-    readonly node: PintuNodeModel,
+    readonly node: NodeModel,
   ) {}
 
-  isValid(engine: IFlowEngine): boolean {
-    return false; // TODO
+  validate(engine: IFlowEngine): boolean {
+    return true;
   }
 
-  accept(engine: IFlowEngine): IStepConfigMap {
-    // TODO
-    console.log('Accept Node Removal');
-    return {};
+  getInvalidReason() {
+    return null;
+  }
+
+  accept(engine: IFlowEngine): IStepConfigMapChange {
+    return {
+      [this.node.config.id]: null,
+    };
   }
 
   reject(engine: IFlowEngine) {
-    // TODO
-    console.log('Reject Node Removal');
+    throw new Error('Impossible action. All NodeRemoved changes are accepted');
   }
 }

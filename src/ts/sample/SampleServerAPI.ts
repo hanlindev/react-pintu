@@ -14,16 +14,14 @@ const DefaultFlow: IFlow = {
     0: {
       id: '0',
       containerName: 'SampleView',
+      sources: [],
       destinations: {
-        // testAction1: {
-        //   type: 'step',
-        //   stepID: '1',
-        // },
       },
     },
     1: {
       id: '1',
       containerName: 'SampleView',
+      sources: [],
       destinations: {},
     }
   },

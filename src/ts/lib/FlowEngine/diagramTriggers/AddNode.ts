@@ -2,7 +2,7 @@ import {DiagramEngine} from 'storm-react-diagrams';
 
 import {IContainerSpec, IStepConfig, IFlow} from '../../interfaces';
 import {ContainerRegistry} from '../../ContainerRegistry';
-import {PintuNodeModel} from '../../../components/ui/diagrams';
+import {NodeModel} from '../../../components/ui/diagrams';
 import {IDiagramTrigger} from '../interfaces';
 
 interface IPosition {
@@ -11,7 +11,7 @@ interface IPosition {
 }
 
 export class AddNode implements IDiagramTrigger {
-  private node: PintuNodeModel;
+  private node: NodeModel;
   private consumed: boolean = false;
 
   constructor(
@@ -20,7 +20,7 @@ export class AddNode implements IDiagramTrigger {
     position: IPosition,
   ) {
     const stepConfig = this.buildStepConfig(containerSpec, flow);
-    this.node = new PintuNodeModel(stepConfig, containerSpec);
+    this.node = new NodeModel(stepConfig, containerSpec);
     this.node.x = position.x;
     this.node.y = position.y;
   }
@@ -38,6 +38,7 @@ export class AddNode implements IDiagramTrigger {
       id: id.toString(),
       containerName: containerSpec.name,
       destinations: {},
+      sources: [],
     };
   }
 

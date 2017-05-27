@@ -1,9 +1,9 @@
 import {AbstractInstanceFactory} from 'storm-react-diagrams';
-import {PintuBasePortModel} from './PintuBasePortModel';
+import {BasePortModel} from './BasePortModel';
 import {IAction} from '../../../lib/interfaces';
 import {preparePayloadDeclarationSerialize, deSerializePayloadDeclaration} from '../../../lib/types';
 
-export class PintuActionPortModel extends PintuBasePortModel {
+export class ActionPortModel extends BasePortModel {
   private _action: IAction;
   get action(): IAction {
     return this._action;
@@ -63,12 +63,12 @@ export class PintuActionPortModel extends PintuBasePortModel {
   }
 }
 
-export class PintuActionPortFactory extends AbstractInstanceFactory<PintuActionPortModel> {
+export class ActionPortFactory extends AbstractInstanceFactory<ActionPortModel> {
   constructor() {
-    super('PintuActionPortModel');
+    super('ActionPortModel');
   }
 
   getInstance() {
-    return new PintuActionPortModel();
+    return new ActionPortModel();
   }
 }

@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import * as React from 'react';
+import * as Props from 'prop-types';
 import {createStore} from 'redux'
 import {Provider} from 'react-redux'
 import {Router, Route} from 'react-router';
@@ -22,6 +23,7 @@ export interface IPintuProviderProps {
 
 const DEFAULT_CONTEXT: IThemeContext = {
   theme: getDefaultTheme(),
+  registry: new ContainerRegistry(),
 }
 
 export class PintuProvider extends React.Component<IPintuProviderProps, void> {
@@ -39,7 +41,10 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
   }
 
   getChildContext() {
-    return _.merge({...DEFAULT_CONTEXT}, {theme: this.props.theme});
+    return _.merge({...DEFAULT_CONTEXT}, {
+      theme: this.props.theme,
+      registry: this.props.containerRegistry,
+    });
   }
 
   private getBuilderComponent() {

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as Props from 'prop-types';
 import * as _ from 'lodash';
+import {ContainerRegistry} from '../../lib/ContainerRegistry';
 
 export interface ITheme {
   color: {
@@ -28,6 +29,7 @@ export type IThemeCustomization = Pick<ITheme, keyof(ITheme)>;
 
 export interface IThemeContext {
   theme: ITheme;
+  registry: ContainerRegistry;
 }
 
 export const ThemeContextProps = {
@@ -52,6 +54,7 @@ export const ThemeContextProps = {
       large: Props.number,
     }).isRequired,
   }),
+  registry: Props.instanceOf(ContainerRegistry),
 }
 
 export function getDefaultTheme(): ITheme {

@@ -1,15 +1,15 @@
 import * as React from 'react';
 
-import {PintuPortWidget as PortWidget} from './PintuPortWidget';
-import {PintuEntrancePortModel} from './PintuEntrancePortModel';
+import {PortWidget} from './PortWidget';
+import {EntrancePortModel} from './EntrancePortModel';
 import {ThemeableComponent} from '../ThemeableComponent';
 
-export interface IPintuEntrancePortLabelProps {
-  model: PintuEntrancePortModel;
+export interface IEntrancePortLabelProps {
+  model: EntrancePortModel;
   style?: React.CSSProperties;
 }
 
-export class PintuEntrancePortLabel extends ThemeableComponent<IPintuEntrancePortLabelProps, void> {
+export class EntrancePortLabel extends ThemeableComponent<IEntrancePortLabelProps, void> {
   render() {
     const {model, ...others} = this.props;
     const port = (

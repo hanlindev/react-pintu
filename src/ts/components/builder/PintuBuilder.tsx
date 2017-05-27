@@ -5,6 +5,7 @@ import {connect, Dispatch} from 'react-redux';
 import {push} from 'react-router-redux';
 import {DiagramEngine, DiagramModel, DiagramWidget, LinkModel} from 'storm-react-diagrams';
 import CircularProgress from 'material-ui/CircularProgress';
+import Snackbar from 'material-ui/Snackbar';
 
 import {IState} from '../../reducers';
 import {actions, getDiagramEngine} from '../../reducers/builder/actions';
@@ -26,6 +27,7 @@ interface IFlowCanvas {
   flow: IFlow;
   diagramEngine: DiagramEngine;
 }
+
 export interface IPintuBuilderProps {
   dispatch: Dispatch<BuilderActionType>;
   flowCanvas?: IFlowCanvas;
@@ -35,6 +37,7 @@ export interface IPintuBuilderProps {
   onUserSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   params: IParams;
   registry: ContainerRegistry;
+  snackMessage: string | null;
 }
 
 interface IPintuBuilderState {
@@ -151,14 +154,14 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
   }
 
   _onRightClickCanvas(e: React.MouseEvent<any>) {
-    // TODO differentiate long click vs short click 
-    // (so after dragging, don't show context)
-    e.preventDefault();
-    const {screenX, screenY} = e;
-    this.setNewNodeMenuPosition({
-      y: screenY,
-      x: screenX,
-    });
+    if (!e.shiftKey) {
+      e.preventDefault();
+      const {screenX, screenY} = e;
+      this.setNewNodeMenuPosition({
+        y: screenY,
+        x: screenX,
+      });
+    }
   }
 
   private dismissNewNodeMenu() {
@@ -189,8 +192,10 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
 
   render() {
     const {
+      dispatch,
       flowCanvas,
       registry,
+      snackMessage,
     } = this.props;
     const {
       newNodeMenuPosition,
@@ -227,9 +232,9 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           style={this._getCanvasStyle()}
         >
           <ContextPopover
-            show={true}
-            position={newNodeMenuPosition}
-          >
+              show={true}
+              position={newNodeMenuPosition}
+            >
             <ContainerSelector 
               registry={registry}
               flow={flowCanvas.flow}
@@ -245,6 +250,12 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
         <div style={this._getConfigurationTrayStyle()}>
           TODO
         </div>
+        <Snackbar
+          open={!!snackMessage}
+          message={snackMessage || ''}
+          autoHideDuration={4000}
+          onRequestClose={() => dispatch(actions.setSnackMessage(null))}
+        />
       </div>
     );
   }
@@ -271,6 +282,7 @@ export function createBuilder(
       ...eventHandlers,
       ...flowCanvas,
       registry,
+      snackMessage: state.builder.snackMessage,
     };
   })(PintuBuilder);
 }

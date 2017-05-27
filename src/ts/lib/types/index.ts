@@ -33,7 +33,7 @@ export function preparePayloadDeclarationSerialize(
 const TypeClasses = [PrimitiveTypeChecker];
 export function deSerializePayloadDeclaration(
   typeStrings: string | {[key: string]: string},
-): IPayloadDeclaration | null {
+): IPayloadDeclaration {
   if (_.isString(typeStrings)) {
     typeStrings = JSON.parse(typeStrings);
   }
@@ -44,7 +44,7 @@ export function deSerializePayloadDeclaration(
       result[name] = serialized;
     }
   });
-  return (_.size(result) > 0) ? result : null;
+  return (_.size(result) > 0) ? result : {};
 }
 
 export function deSerializeTypeDeclaration(
@@ -56,11 +56,11 @@ export function deSerializeTypeDeclaration(
   let result = null;
   TypeClasses.some((clazz) => {
     const trialResult = clazz.fromObject(typeObject);
-      if (trialResult !== null) {
-        result = trialResult;
-        return true;
-      }
-      return false;
+    if (trialResult !== null) {
+      result = trialResult;
+      return true;
+    }
+    return false;
   });
   return result;
 }

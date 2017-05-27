@@ -1,8 +1,7 @@
 import {LinkModel} from 'storm-react-diagrams';
 import {IStepConfigMap} from '../../interfaces/flow';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
-import {PintuActionPortModel} from '../../../components/ui/diagrams';
-
+import {ActionPortModel, EntrancePortModel} from '../../../components/ui/diagrams';
 /**
  * Accept:
  * The source node's action's destination wll be deleted.
@@ -13,19 +12,24 @@ import {PintuActionPortModel} from '../../../components/ui/diagrams';
 export class LinkRemoved implements IDiagramChange {
   constructor(readonly link: LinkModel) {}
 
-  isValid(engine: IFlowEngine): boolean {
+  validate(engine: IFlowEngine): boolean {
     // For now, link removal is always valid
     return true;
   }
 
+  getInvalidReason() {
+    return null;
+  }
+
   accept(engine: IFlowEngine): IStepConfigMap {
     const result: IStepConfigMap = {}
-    const sourcePort = this.link.getSourcePort() as PintuActionPortModel;
-    if (sourcePort) {
+    const sourcePort = this.link.getSourcePort() as ActionPortModel;
+    if (sourcePort instanceof ActionPortModel) {
       const node = engine.getNodeRef(sourcePort);
       delete node.config.destinations[sourcePort.action.id];
       result[node.config.id] = node.config;
     }
+    // TODO handle output port
     return result;
   }
 

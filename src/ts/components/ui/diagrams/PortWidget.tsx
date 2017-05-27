@@ -4,13 +4,14 @@ import * as cx from 'classnames';
 import {PortModel, NodeModel} from 'storm-react-diagrams';
 import {FontIcon} from 'material-ui';
 
-import {PintuInputPortModel} from './PintuInputPortModel';
-import {PintuActionPortModel} from './PintuActionPortModel';
-import {PintuEntrancePortModel} from './PintuEntrancePortModel';
+import {InputPortModel} from './InputPortModel';
+import {OutputPortModel} from './OutputPortModel';
+import {ActionPortModel} from './ActionPortModel';
+import {EntrancePortModel} from './EntrancePortModel';
 import {TypeCheckerFactory} from '../../../lib/interfaces';
 import {PrimitiveTypeChecker} from '../../../lib/types/PrimitiveTypeChecker';
 
-export interface IPintuPortProps {
+export interface IPortProps {
 	name: string;
 	port: PortModel;
   node: NodeModel;
@@ -26,13 +27,16 @@ const DEFAULT_COLORS = {
   borderColor: 'white',
 };
 
-class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
+class _PortWidget extends React.Component<IPortProps, void> {
   get mode() {
     return (() => {
       const {port} = this.props;
-      if (port instanceof PintuInputPortModel) {
+      if (
+        port instanceof InputPortModel 
+        || port instanceof OutputPortModel
+      ) {
         return 'type';
-      } else if (port instanceof PintuActionPortModel) {
+      } else if (port instanceof ActionPortModel) {
         return 'action';
       } else {
         return 'default';
@@ -43,14 +47,14 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
   get type(): TypeCheckerFactory | null {
     return (() => {
       const {port} = this.props;
-      if (port instanceof PintuInputPortModel) {
+      if (port instanceof InputPortModel) {
         return port.type;
       }
       return null;
     })();
   }
 
-	constructor(props: IPintuPortProps){
+	constructor(props: IPortProps){
 		super(props);
 	}
 
@@ -102,13 +106,15 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
       switch (type.type) {
         case 'array':
         case 'object':
-          return {};
+          return {
+            cursor: 'crosshair',
+          };
         default:
           return {
             borderRadius: '50%',
             borderWidth: 2,
             borderStyle: 'solid',
-            cursor: 'move',
+            cursor: 'crosshair',
             height: size,
             userSelect: 'none',
             width: size,
@@ -128,7 +134,8 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
     const type = typeFactory();
     if (
       type instanceof PrimitiveTypeChecker 
-      && (type.type === 'array' || type.type === 'object')) {
+      && (type.type === 'array' || type.type === 'object')
+    ) {
       return (
         <FontIcon 
           className="material-icons"
@@ -138,7 +145,7 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
             marginLeft: -1,
           }}
         >
-          view_comfy
+          {(type.type === 'array') ? 'view_comfy' : 'list'}
         </FontIcon>
       );
     }
@@ -184,7 +191,7 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
 	render() {
     const {name, node} = this.props;
     const className = cx({
-      'port': this.mode !== 'type',
+      'port': true,
     });
 
     return (
@@ -222,4 +229,4 @@ class _PintuPortWidget extends React.Component<IPintuPortProps, void> {
   }
 }
 
-export const PintuPortWidget = Radium(_PintuPortWidget);
+export const PortWidget = Radium(_PortWidget);

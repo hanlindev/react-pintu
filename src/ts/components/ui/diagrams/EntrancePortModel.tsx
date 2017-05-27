@@ -1,8 +1,8 @@
 import {AbstractInstanceFactory, PortModel} from 'storm-react-diagrams';
-import {PintuBasePortModel} from './PintuBasePortModel';
+import {BasePortModel} from './BasePortModel';
 import {ITypeChecker} from '../../../lib';
 
-export class PintuEntrancePortModel extends PintuBasePortModel {
+export class EntrancePortModel extends BasePortModel {
   public portType = 'entrance';
   constructor() {
     super('entrance');
@@ -23,12 +23,12 @@ export class PintuEntrancePortModel extends PintuBasePortModel {
   }
 }
 
-export class PintuEntrancePortFactory extends AbstractInstanceFactory<PintuEntrancePortModel> {
+export class EntrancePortFactory extends AbstractInstanceFactory<EntrancePortModel> {
   constructor() {
-    super('PintuEntrancePortModel');
+    super('EntrancePortModel');
   }
 
-  getInstance(): PintuEntrancePortModel {
-    return new PintuEntrancePortModel();
+  getInstance(): EntrancePortModel {
+    return new EntrancePortModel();
   }
 }

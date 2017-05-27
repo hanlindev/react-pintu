@@ -3,7 +3,8 @@ import {DiagramEngine, DiagramModel, DiagramEngineListener, DiagramListener as D
 import {Dispatch} from 'react-redux';
 import {LinkListener} from './LinkListener';
 import {IDiagramChange} from '../interfaces';
-import {LinkAdded, LinkRemoved, NodeAdded, NodeRemoved} from '../builderEvents';
+import {LinkAdded, LinkRemoved, NodeAdded, NodeRemoved, NodeSourceRemoved} from '../builderEvents';
+import {NodeModel, ActionPortModel} from '../../../components/ui/diagrams';
 
 export interface IDiagramEvents {
   onDiagramChange: (linkChange: IDiagramChange) => void;
@@ -39,13 +40,23 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
 
   linksUpdated?(link: LinkModel, isCreated: boolean): void {
     if (isCreated) {
+      link.clearListeners();
       link.addListener(new LinkListener(link, this.events));
       _.defer(() => {
         this.events.onDiagramChange(new LinkAdded(link));
       });
     } else {
+      link.clearListeners();
       _.defer(() => {
         this.events.onDiagramChange(new LinkRemoved(link));
+        const srcPort = link.getSourcePort() as ActionPortModel;
+        const targetPort = link.getTargetPort();
+        if (srcPort && targetPort) {
+          const targetNode = targetPort.getParent() as NodeModel;
+          this.events.onDiagramChange(
+            new NodeSourceRemoved(targetNode, link),
+           );
+        }
       })
     }
   }

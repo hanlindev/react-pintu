@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import {PortModel} from 'storm-react-diagrams';
 import {ITypeChecker} from '../../../lib';
 
-export class PintuBasePortModel extends PortModel {
+export class BasePortModel extends PortModel {
   public portType = 'base';
 
   constructor(name: string) {

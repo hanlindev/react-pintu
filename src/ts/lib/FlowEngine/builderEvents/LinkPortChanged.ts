@@ -1,38 +1,59 @@
 import {LinkModel, PortModel} from 'storm-react-diagrams';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
-import {IStepConfigMap} from '../../interfaces/flow';
-import {PintuWireablePortType} from '../../../components/ui/diagrams';
-import {PintuNodeModel} from '../../../components/ui/diagrams/PintuNodeModel';
-import {PintuActionPortModel} from '../../../components/ui/diagrams/PintuActionPortModel';
-import {PintuEntrancePortModel} from '../../../components/ui/diagrams/PintuEntrancePortModel';
+import {IStepConfigMapChange} from '../../interfaces/flow';
+import {BasePortModel, OutputPortModel, ActionPortModel, WireablePortType} from '../../../components/ui/diagrams';
+import {NodeModel} from '../../../components/ui/diagrams/NodeModel';
+import {EntrancePortModel} from '../../../components/ui/diagrams/EntrancePortModel';
+import {InputPortModel} from '../../../components/ui/diagrams/InputPortModel';
 
-type LinkPortType = 'action' | 'entrance';
+type LinkPortType = 'action' | 'entrance' | 'input';
 
 abstract class LinkPortChanged implements IDiagramChange {
-  protected _port: PintuWireablePortType;
+  protected _port: WireablePortType;
+  protected invalidReason: string | null = null;
 
   constructor(readonly link: LinkModel, readonly type: LinkPortType) {
     switch (type) {
       case 'action':
-        this._port = link.getSourcePort() as PintuWireablePortType;
+        this._port = link.getSourcePort() as WireablePortType;
         break;
       case 'entrance':
-        this._port = link.getTargetPort() as PintuWireablePortType;
+      case 'input':
+        this._port = link.getTargetPort() as WireablePortType;
         break;
       default:
         throw new TypeError(`Unrecognized type '${type}'.`);
     }
   }
 
-  isValid(engine: IFlowEngine) {
+  validate(engine: IFlowEngine) {
     const {type, _port} = this;
-    return (
-      (type === 'action' && _port instanceof PintuActionPortModel)
-      || (type === 'entrance' && _port instanceof PintuEntrancePortModel)
-    );
+    if (type === 'action' && !(_port instanceof ActionPortModel)) {
+      this.invalidReason =
+        "A link must come out of an action port.";
+      return false;
+    }
+
+    if (type === 'entrance' && !(_port instanceof EntrancePortModel)) {
+      this.invalidReason =
+        "An entrance link's destination must be an entrance port";
+      return false;
+    }
+
+    if (type === 'input' && !(_port instanceof InputPortModel)) {
+      this.invalidReason =
+        "An input link's destination must be an input port";
+      return false;
+    }
+
+    return true;
   }
 
-  abstract accept(engine: IFlowEngine): IStepConfigMap;
+  getInvalidReason() {
+    return this.invalidReason;
+  }
+
+  abstract accept(engine: IFlowEngine): IStepConfigMapChange;
   abstract reject(engine: IFlowEngine): void;
 }
 
@@ -49,21 +70,58 @@ abstract class LinkPortChanged implements IDiagramChange {
  * Remove this link.
  */
 export class LinkTargetPortChanged extends LinkPortChanged {
-  public get port(): PintuEntrancePortModel {
-    return this._port as PintuEntrancePortModel;
+  public get port(): EntrancePortModel {
+    return this._port as EntrancePortModel;
   }
 
   constructor(link: LinkModel) {
-    super(link, 'entrance');
+    super(
+      link, 
+      (link.getTargetPort() as BasePortModel).portType as LinkPortType,
+    );
   }
 
   getNode(port: PortModel) {
-    return port.getParent() as PintuNodeModel;
+    return port.getParent() as NodeModel;
   }
 
-  accept(engine: IFlowEngine): IStepConfigMap {
-    const result: IStepConfigMap = {};
-    const srcPort = this.link.getSourcePort() as PintuActionPortModel;
+  validate(engine: IFlowEngine) {
+    if (!super.validate(engine)) {
+      return false;
+    }
+
+    const srcPort = this.link.getSourcePort();
+    if (
+      srcPort instanceof OutputPortModel
+      && this.port instanceof EntrancePortModel
+    ) {
+      this.invalidReason =
+        'An output port must be connected with an input port';
+      return false;
+    }
+
+    if (
+      srcPort instanceof ActionPortModel
+      && this.port instanceof InputPortModel
+    ) {
+      this.invalidReason =
+        'An action port must be connected with an entrance port';
+      return false;
+    }
+    return true;
+  }
+
+  accept(engine: IFlowEngine): IStepConfigMapChange {
+    if (this.port instanceof EntrancePortModel) {
+      return this.acceptForEntrance(engine);
+    }
+
+    return this.acceptForInput(engine);
+  }
+
+  acceptForEntrance(engine: IFlowEngine): IStepConfigMapChange {
+    const result: IStepConfigMapChange = {};
+    const srcPort = this.link.getSourcePort() as ActionPortModel;
     const srcStep = this.getNode(this.link.getSourcePort());
     const targetStep = this.getNode(this.port);
     srcStep.config.destinations[srcPort.action.id] = {
@@ -72,6 +130,10 @@ export class LinkTargetPortChanged extends LinkPortChanged {
     };
     result[srcStep.config.id] = srcStep.config;
     return result;
+  }
+
+  acceptForInput(engine: IFlowEngine): IStepConfigMapChange {
+    return {};
   }
 
   reject(engine: IFlowEngine) {

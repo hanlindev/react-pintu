@@ -4,7 +4,7 @@ import {Dispatch} from 'react-redux';
 import * as Immutable from 'immutable';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
 import {ILinkSource, IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../../lib/interfaces';
-import {BuilderActionType, SET_FLOW, UPDATE_STEP_CONFIGS, SET_SERIALIZED_DIAGRAM} from './common';
+import {BuilderActionType, SET_FLOW, UPDATE_STEP_CONFIGS, SET_SERIALIZED_DIAGRAM, SET_SNACK_MESSAGE} from './common';
 
 export function builder(state: BuilderState, action: BuilderActionType) {
   if (!state) {
@@ -16,6 +16,8 @@ export function builder(state: BuilderState, action: BuilderActionType) {
       return state.setFlow(action.newFlow);
     case UPDATE_STEP_CONFIGS:
       return state.updateStepConfigs(action.stepConfigChanges);
+    case SET_SNACK_MESSAGE:
+      return state.setSnackMessage(action.message);
     case SET_SERIALIZED_DIAGRAM:
       return state.setSerializedDiagram(action.serializedDiagram);
   }
@@ -25,13 +27,19 @@ export function builder(state: BuilderState, action: BuilderActionType) {
 
 const BuilderRecord = Immutable.Record({
   flow: null,
+  snackMessage: null,
 });
 
 export class BuilderState extends BuilderRecord {
   flow: IFlow | null;
+  snackMessage: string | null;
 
   setFlow(flow: IFlow) {
     return this.set('flow', flow);
+  }
+
+  setSnackMessage(message: string | null) {
+    return this.set('snackMessage', message);
   }
 
   getFlowClone(): IFlow | null{
@@ -52,7 +60,7 @@ export class BuilderState extends BuilderRecord {
     });
   }
 
-  updateStepConfigs(stepConfigChanges: {[stepID: string]: IStepConfig}) {
+  updateStepConfigs(stepConfigChanges: {[key: string]: IStepConfig}) {
     const flowClone = this.getFlowClone();
     if (!flowClone) {
       return this;

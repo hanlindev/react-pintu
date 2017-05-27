@@ -1,12 +1,13 @@
 import * as _ from 'lodash';
-import {AbstractInstanceFactory, DiagramModel, LinkModel, NodeModel, PortModel} from 'storm-react-diagrams';
-import {PintuInputPortModel} from './PintuInputPortModel';
-import {PintuActionPortModel} from './PintuActionPortModel';
-import {PintuEntrancePortModel} from './PintuEntrancePortModel';
-import {IStepConfig, IActionsDeclaration, IContainerSpec} from '../../../lib/interfaces';
+import {AbstractInstanceFactory, DiagramModel, LinkModel, NodeModel as SRDNodeModel, PortModel} from 'storm-react-diagrams';
+import {InputPortModel} from './InputPortModel';
+import {ActionPortModel} from './ActionPortModel';
+import {EntrancePortModel} from './EntrancePortModel';
+import {OutputPortModel} from './OutputPortModel';
+import {IStepConfig, IActionsDeclaration, IContainerSpec, TypeCheckerFactory} from '../../../lib/interfaces';
 import {preparePayloadDeclarationSerialize, deSerializePayloadDeclaration} from '../../../lib/types';
 
-export class PintuNodeModel extends NodeModel {
+export class NodeModel extends SRDNodeModel {
   private _config: IStepConfig;
   get config(): IStepConfig {
     return this._config;
@@ -18,7 +19,7 @@ export class PintuNodeModel extends NodeModel {
   }
 
   constructor(config?: IStepConfig, container?: IContainerSpec) {
-    super('PintuNode');
+    super('Node');
     if (config && container) {
       this.setData(config, container);
     }
@@ -27,13 +28,37 @@ export class PintuNodeModel extends NodeModel {
   setData(config: IStepConfig, container: IContainerSpec) {
     this._config = config;
     this._container = container;
-    this.addPort(new PintuEntrancePortModel());
+    this.addPort(new EntrancePortModel());
     _.forEach(container.inputs, (type, name: string) => {
-      this.addPort(new PintuInputPortModel(name, type));
+      this.addPort(new InputPortModel(name, type));
     });
 
     _.forEach(container.actions, (action, name: string) => {
-      this.addPort(new PintuActionPortModel(action));
+      this.addPort(new ActionPortModel(action));
+    });
+  }
+
+  // groupID identifies a group of output ports. They are usually grouped by
+  // actions.
+  addOutputPort(name: string, type: TypeCheckerFactory, groupID?: string) {
+    const outputPorts = this.getOutputPortModels();
+    const existing = outputPorts.find((model) => {
+      return (
+        model.groupID === groupID
+        && model.argName === name
+      );
+    });
+    if (!existing) {
+      this.addPort(new OutputPortModel(name, type, groupID));
+    }
+  }
+
+  clearOutputPorts(groupID?: string) {
+    const outputPorts = this.getOutputPortModels().filter((port) => {
+      return !groupID || port.groupID === groupID;
+    });
+    outputPorts.forEach((port) => {
+      this.removePort(port);
     });
   }
 
@@ -119,23 +144,27 @@ export class PintuNodeModel extends NodeModel {
     }).filter(Boolean) as Array<TPortModel>;
   }
 
-  getEntrancePortModel(): PintuEntrancePortModel {
-    return this.getPortModelsByType(PintuEntrancePortModel)[0];
+  getEntrancePortModel(): EntrancePortModel {
+    return this.getPortModelsByType(EntrancePortModel)[0];
   }
 
-  getInputPortModels(): Array<PintuInputPortModel> {
-    return this.getPortModelsByType(PintuInputPortModel);
+  getInputPortModels(): Array<InputPortModel> {
+    return this.getPortModelsByType(InputPortModel);
   }
 
-  getActionPortModels(): Array<PintuActionPortModel> {
-    return this.getPortModelsByType(PintuActionPortModel);
+  getActionPortModels(): Array<ActionPortModel> {
+    return this.getPortModelsByType(ActionPortModel);
   }
 
-  getActionPortWithID(actionID: string): PintuActionPortModel | undefined {
+  getActionPortWithID(actionID: string): ActionPortModel | undefined {
     const actionPortModels = this.getActionPortModels();
     return actionPortModels.find((portModel) => {
       return portModel.action.id === actionID;
     });
+  }
+  
+  getOutputPortModels(): Array<OutputPortModel> {
+    return this.getPortModelsByType(OutputPortModel);
   }
 
   /**
@@ -150,7 +179,7 @@ export class PintuNodeModel extends NodeModel {
    */
   tryRestoreLink(
     actionId: string, 
-    destNode: PintuNodeModel,
+    destNode: NodeModel,
     targetModel: DiagramModel
   ): boolean {
     const destConfig = this.config.destinations[actionId];
@@ -182,13 +211,12 @@ export class PintuNodeModel extends NodeModel {
   }
 }
 
-export class PintuNodeInstanceFactory extends AbstractInstanceFactory<PintuNodeModel>{
-	
+export class NodeInstanceFactory extends AbstractInstanceFactory<NodeModel>{
 	constructor(){
-		super("PintuNodeModel");
+		super("NodeModel");
 	}
 	
 	getInstance(){
-		return new PintuNodeModel();
+		return new NodeModel();
 	}
 }
