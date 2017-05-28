@@ -13,7 +13,6 @@ export class LinkRemoved implements IDiagramChange {
   constructor(readonly link: LinkModel) {}
 
   validate(engine: IFlowEngine): boolean {
-    // For now, link removal is always valid
     return true;
   }
 
@@ -24,12 +23,11 @@ export class LinkRemoved implements IDiagramChange {
   accept(engine: IFlowEngine): IStepConfigMap {
     const result: IStepConfigMap = {}
     const sourcePort = this.link.getSourcePort() as ActionPortModel;
-    if (sourcePort instanceof ActionPortModel) {
+    if (sourcePort instanceof ActionPortModel && engine.hasNode(sourcePort)) {
       const node = engine.getNodeRef(sourcePort);
       delete node.config.destinations[sourcePort.action.id];
       result[node.config.id] = node.config;
     }
-    // TODO handle output port
     return result;
   }
 

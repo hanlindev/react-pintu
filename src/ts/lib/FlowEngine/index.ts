@@ -109,6 +109,15 @@ export class FlowEngine implements IFlowEngine {
       return data.getParent() as NodeModel;  
     }
   }
+  
+  hasNode(stepIDOrPort: string | PortModel): boolean {
+    try {
+      const node = this.getNodeRef(stepIDOrPort);
+      return !!node;
+    } catch (e) {
+      return false;
+    }
+  }
 
   getContainer(name: string): BaseContainer {
     return FlowEngine.registry.getContainer(name);

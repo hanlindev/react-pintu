@@ -9,8 +9,8 @@ interface IResult {
 export class BranchLogic extends LogicContainer<IResult> {
   getContainerSpec(): IContainerSpec {
     return {
-      name: 'SampleLogic',
-      pathTemplate: '/sample_logic',
+      name: 'Branch',
+      pathTemplate: '/branch',
       inputs: {
         flag: Types.bool,
       },

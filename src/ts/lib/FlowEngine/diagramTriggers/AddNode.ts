@@ -39,6 +39,7 @@ export class AddNode implements IDiagramTrigger {
       containerName: containerSpec.name,
       destinations: {},
       sources: [],
+      actionPayloads: {},
     };
   }
 

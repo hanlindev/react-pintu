@@ -73,6 +73,7 @@ export abstract class BaseNodeWidget
     return (
       <div style={this.getNodeRootStyle()}>
         <div style={this.getTitleStyle()}>
+          {node.config.id}.
           {camelToWords(node.getName())}
         </div>
 

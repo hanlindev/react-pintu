@@ -108,6 +108,17 @@ export class LinkTargetPortChanged extends LinkPortChanged {
         'An action port must be connected with an entrance port';
       return false;
     }
+
+    if (
+      srcPort instanceof OutputPortModel
+      && this.port instanceof InputPortModel
+      && !srcPort.type().isEqual(this.port.type())
+    ) {
+      this.invalidReason =
+        "Output's and input's types must be the same";
+      return false;
+    }
+
     return true;
   }
 

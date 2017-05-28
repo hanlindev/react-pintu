@@ -99,7 +99,6 @@ export const actions = {
           dispatch(actions.setSnackMessage(linkChange.getInvalidReason()));
           linkChange.reject(flowEngine);
         }
-
       }
       dispatch(actions.setFlow(flow));
       dispatch(actions.saveDiagram(flow));

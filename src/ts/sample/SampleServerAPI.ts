@@ -17,12 +17,14 @@ const DefaultFlow: IFlow = {
       sources: [],
       destinations: {
       },
+      actionPayloads: {},
     },
     1: {
       id: '1',
       containerName: 'SampleView',
       sources: [],
       destinations: {},
+      actionPayloads: {},
     }
   },
   serializedDiagram: null,

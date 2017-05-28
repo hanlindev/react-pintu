@@ -9,6 +9,8 @@ export interface IFlowEngine {
   // event can modify the data.
   getNodeRef(stepID: string): NodeModel;
   getNodeRef(port: PortModel): NodeModel;
+  hasNode(stepID: string): boolean;
+  hasNode(port: PortModel): boolean;
   repaintCanvas(): void;
   getDiagramEngine(): DiagramEngine;
   getDiagramModel(): DiagramModel;
