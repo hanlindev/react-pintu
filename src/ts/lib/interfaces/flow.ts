@@ -21,6 +21,22 @@ export interface IActionPayload {
   [fieldName: string]: any;
 }
 
+export type IInputSource = 
+{
+  type: 'actionPayload',
+  stepID: string;
+  actionID: string;
+  outputName: string;
+}
+| {
+  type: 'constant',
+  value: any,
+};
+
+export interface IInputSourceMap {
+  [inputName: string]: IInputSource;
+}
+
 export interface IActionPayloadMap {
   [actrionID: string]: IActionPayload;
 }
@@ -41,7 +57,8 @@ export interface IStepConfig {
   containerName: string;
   sources: Array<ISourceSpec>,
   destinations: {[actionName: string]: IActionDestination};
-  actionPayloads: IActionPayloadMap
+  actionPayloads: IActionPayloadMap;
+  inputSources: IInputSourceMap;
 }
 
 export interface IStepConfigMap {

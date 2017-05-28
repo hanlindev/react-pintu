@@ -5,6 +5,7 @@ import {BasePortModel, OutputPortModel, ActionPortModel, WireablePortType} from 
 import {NodeModel} from '../../../components/ui/diagrams/NodeModel';
 import {EntrancePortModel} from '../../../components/ui/diagrams/EntrancePortModel';
 import {InputPortModel} from '../../../components/ui/diagrams/InputPortModel';
+import {ActionPayloadMultiplexer} from '../../containers'
 
 type LinkPortType = 'action' | 'entrance' | 'input';
 
@@ -70,8 +71,8 @@ abstract class LinkPortChanged implements IDiagramChange {
  * Remove this link.
  */
 export class LinkTargetPortChanged extends LinkPortChanged {
-  public get port(): EntrancePortModel {
-    return this._port as EntrancePortModel;
+  public getPort<T extends WireablePortType>(): T {
+    return this._port as T;
   }
 
   constructor(link: LinkModel) {
@@ -93,7 +94,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
     const srcPort = this.link.getSourcePort();
     if (
       srcPort instanceof OutputPortModel
-      && this.port instanceof EntrancePortModel
+      && this._port instanceof EntrancePortModel
     ) {
       this.invalidReason =
         'An output port must be connected with an input port';
@@ -102,7 +103,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
 
     if (
       srcPort instanceof ActionPortModel
-      && this.port instanceof InputPortModel
+      && this._port instanceof InputPortModel
     ) {
       this.invalidReason =
         'An action port must be connected with an entrance port';
@@ -111,8 +112,8 @@ export class LinkTargetPortChanged extends LinkPortChanged {
 
     if (
       srcPort instanceof OutputPortModel
-      && this.port instanceof InputPortModel
-      && !srcPort.type().isEqual(this.port.type())
+      && this._port instanceof InputPortModel
+      && !srcPort.type().isEqual(this._port.type())
     ) {
       this.invalidReason =
         "Output's and input's types must be the same";
@@ -123,7 +124,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
   }
 
   accept(engine: IFlowEngine): IStepConfigMapChange {
-    if (this.port instanceof EntrancePortModel) {
+    if (this._port instanceof EntrancePortModel) {
       return this.acceptForEntrance(engine);
     }
 
@@ -134,7 +135,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
     const result: IStepConfigMapChange = {};
     const srcPort = this.link.getSourcePort() as ActionPortModel;
     const srcStep = this.getNode(this.link.getSourcePort());
-    const targetStep = this.getNode(this.port);
+    const targetStep = engine.getNodeRef(this._port);
     srcStep.config.destinations[srcPort.action.id] = {
       type: 'step',
       stepID: targetStep.config.id,
@@ -144,7 +145,25 @@ export class LinkTargetPortChanged extends LinkPortChanged {
   }
 
   acceptForInput(engine: IFlowEngine): IStepConfigMapChange {
-    return {};
+    const targetNode = engine.getNodeRef(this._port);
+    const {argName} = this.getPort<InputPortModel>();
+    const sourcePort = this.link.getSourcePort() as OutputPortModel;
+
+    // Currently, the only ActionPayloadMultiplexer node has output ports.
+    // ActionPayloadMultiplexer only has one action - 'next'. So it's safe
+    // to hardcode the next action here.
+    const sourceNode = engine.getNodeRef(sourcePort) as NodeModel;
+    const inputSources = targetNode.config.inputSources || {};
+    inputSources[argName] = {
+      type: 'actionPayload',
+      stepID: sourceNode.config.id,
+      actionID: ActionPayloadMultiplexer.NextActionID,
+      outputName: sourcePort.argName,
+    };
+    targetNode.config.inputSources = inputSources;
+    return {
+      [targetNode.config.id]: targetNode.config,
+    };
   }
 
   reject(engine: IFlowEngine) {

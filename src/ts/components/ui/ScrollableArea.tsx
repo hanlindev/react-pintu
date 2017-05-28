@@ -3,7 +3,9 @@ import ScrollArea from 'react-scrollbar-js';
 import {ThemeableComponent} from './ThemeableComponent';
 
 interface IScrollableAreaProps {
-  height: number;
+  className?: string;
+  height: number | string;
+  style?: React.CSSProperties,
 }
 
 export class ScrollableArea 
@@ -12,9 +14,11 @@ export class ScrollableArea
   private getRootStyle(): React.CSSProperties {
     const {
       height,
+      style,
     } = this.props;
 
     return {
+      ...style,
       height,
     };
   }
@@ -22,6 +26,7 @@ export class ScrollableArea
   render() {
     return (
       <ScrollArea 
+        className={this.props.className}
         style={this.getRootStyle()}
       >
         {this.props.children}

@@ -7,6 +7,8 @@ interface IAutoInput {
 }
 
 export class ActionPayloadMultiplexer extends LogicContainer<void> {
+  static NextActionID = 'next';
+
   getContainerSpec(): IContainerSpec {
     return {
       name: 'ActionPayloadMultiplexer',

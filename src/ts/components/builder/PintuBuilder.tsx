@@ -6,13 +6,16 @@ import {push} from 'react-router-redux';
 import {DiagramEngine, DiagramModel, DiagramWidget, LinkModel} from 'storm-react-diagrams';
 import CircularProgress from 'material-ui/CircularProgress';
 import Snackbar from 'material-ui/Snackbar';
+import {ScrollableArea} from '../ui/ScrollableArea';
 
 import {IState} from '../../reducers';
 import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
 import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
+import {NodeDetailCards} from './NodeDetailCards';
 import {ContextPopover} from '../ui/ContextPopover';
+import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ContainerSelector} from '../ui/ContainerSelector';
 import {safe} from '../../lib/utils';
 
@@ -38,6 +41,7 @@ export interface IPintuBuilderProps {
   params: IParams;
   registry: ContainerRegistry;
   snackMessage: string | null;
+  selectedNode: NodeModel | null;
 }
 
 interface IPintuBuilderState {
@@ -146,10 +150,10 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     return {
       boxSizing: 'border-box',
       flex: '0 0 auto',
-      height: '100%',
-      paddingTop: 4,
-      paddingLeft: 4,
+      padding: 4,
       width: 400,
+      position: 'absolute',
+      right: 0,
     }
   }
 
@@ -196,6 +200,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       flowCanvas,
       registry,
       snackMessage,
+      selectedNode,
     } = this.props;
     const {
       newNodeMenuPosition,
@@ -248,7 +253,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           />
         </div>
         <div style={this._getConfigurationTrayStyle()}>
-          TODO
+          <NodeDetailCards node={selectedNode} />
         </div>
         <Snackbar
           open={!!snackMessage}
@@ -283,6 +288,7 @@ export function createBuilder(
       ...flowCanvas,
       registry,
       snackMessage: state.builder.snackMessage,
+      selectedNode: state.builder.selectedNode,
     };
   })(PintuBuilder);
 }

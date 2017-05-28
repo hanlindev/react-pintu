@@ -4,6 +4,7 @@ import {FlowEngine} from '../../lib/FlowEngine';
 import {IFlow, IStepConfig, IStepConfigMapChange} from '../../lib/interfaces';
 import {DiagramListener, IDiagramEvents} from '../../lib/FlowEngine/listeners/DiagramListener';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
+import {NodeModel} from '../../components/ui/diagrams/NodeModel';
 import {BuilderActionType} from './common';
 import * as common from './common';
 
@@ -27,6 +28,13 @@ export const actions = {
     };
   },
 
+  setSelectedNode(node: NodeModel | null): BuilderActionType {
+    return {
+      type: common.SET_SELECTED_NODE,
+      node,
+    };
+  },
+
   syncNewFlow(newFlow: IFlow) {
     currentFlow = newFlow;
     return (dispatch: Dispatch<BuilderActionType>) => {
@@ -37,6 +45,10 @@ export const actions = {
 
         onSerializeDiagram(serialized: string) {
           dispatch(actions.setSerializedDiagram(serialized));
+        },
+
+        onSelectionChange(node: NodeModel | null) {
+          dispatch(actions.setSelectedNode(node));
         },
       };
 

@@ -18,6 +18,7 @@ const DefaultFlow: IFlow = {
       destinations: {
       },
       actionPayloads: {},
+      inputSources: {},
     },
     1: {
       id: '1',
@@ -25,6 +26,7 @@ const DefaultFlow: IFlow = {
       sources: [],
       destinations: {},
       actionPayloads: {},
+      inputSources: {},
     }
   },
   serializedDiagram: null,

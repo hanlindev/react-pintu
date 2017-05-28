@@ -2,13 +2,15 @@ import * as _ from 'lodash';
 import {DiagramEngine, DiagramModel, DiagramEngineListener, DiagramListener as DiagramModelListener, LinkModel} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
 import {LinkListener} from './LinkListener';
+import {NodeListener} from './NodeListener';
 import {IDiagramChange} from '../interfaces';
 import {LinkAdded, LinkRemoved, NodeAdded, NodeRemoved, NodeSourceRemoved} from '../builderEvents';
 import {NodeModel, ActionPortModel} from '../../../components/ui/diagrams';
 
 export interface IDiagramEvents {
-  onDiagramChange: (linkChange: IDiagramChange) => void;
-  onSerializeDiagram: (serialized: string) => void;
+  onDiagramChange: (linkChange: IDiagramChange) => any;
+  onSerializeDiagram: (serialized: string) => any;
+  onSelectionChange: (node: NodeModel) => any;
 }
 
 export class DiagramListener implements DiagramModelListener, DiagramEngineListener {
@@ -30,17 +32,18 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
     this.events.onSerializeDiagram(serialized);
   }
 
-  nodesUpdated?(node: any, isCreated: boolean): void {
+  nodesUpdated?(node: NodeModel, isCreated: boolean): void {
     if (isCreated) {
+      node.addListener(new NodeListener(node, this.events));
       this.events.onDiagramChange(new NodeAdded(node));
     } else {
+      node.clearListeners();
       this.events.onDiagramChange(new NodeRemoved(node));
     }
   }
 
   linksUpdated?(link: LinkModel, isCreated: boolean): void {
     if (isCreated) {
-      link.clearListeners();
       link.addListener(new LinkListener(link, this.events));
       _.defer(() => {
         this.events.onDiagramChange(new LinkAdded(link));
@@ -85,5 +88,9 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
     events: IDiagramEvents,
   ) {
     DiagramListener.singleInstance = new DiagramListener(engine, events);
+    const model = engine.getDiagramModel();
+    _.forEach(model.getNodes(), (node: NodeModel) => {
+      node.addListener(new NodeListener(node, events));
+    });
   }
 }

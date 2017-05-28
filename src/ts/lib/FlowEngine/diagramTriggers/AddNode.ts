@@ -40,6 +40,7 @@ export class AddNode implements IDiagramTrigger {
       destinations: {},
       sources: [],
       actionPayloads: {},
+      inputSources: {},
     };
   }
 
