@@ -99,7 +99,7 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
           }}
           hintStyle={{
             fontSize: 14,
-            bottom: 3,
+            bottom: 5,
           }}
           inputStyle={{
             fontSize: 14,

@@ -132,6 +132,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       display: 'flex',
       flexFlow: 'row',
       height: '100%',
+      overflow: 'hidden',
       position: 'relative',
       width: '100%',
     };
