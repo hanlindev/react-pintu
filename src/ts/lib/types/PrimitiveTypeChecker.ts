@@ -36,6 +36,28 @@ export class PrimitiveTypeChecker implements ITypeChecker {
     }
   }
 
+  getName(): string {
+    const name = `${_.upperFirst(this.type)} ${this.getExample()}`;
+    return (this.required) ? `${name} (required)` : name;
+  }
+
+  getExample(): string {
+    switch (this.type) {
+      case 'number':
+        return 'e.g. 1, 2, 3';
+      case 'boolean':
+        return 'e.g. true, false';
+      case 'string':
+        return "e.g. 'abc'";
+      case 'object':
+        return "e.g. {a: 1, b: 'c'}";
+      case 'array':
+        return "e.g. ['a', 1, true]";
+      default:
+        return '';
+    }
+  }
+
   isEqual(other: ITypeChecker | undefined): boolean {
     return (
       other instanceof PrimitiveTypeChecker

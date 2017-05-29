@@ -8,13 +8,16 @@ import {InputPortModel} from './InputPortModel';
 import {OutputPortModel} from './OutputPortModel';
 import {ActionPortModel} from './ActionPortModel';
 import {EntrancePortModel} from './EntrancePortModel';
+import {UseType} from './common';
 import {TypeCheckerFactory} from '../../../lib/interfaces';
 import {PrimitiveTypeChecker} from '../../../lib/types/PrimitiveTypeChecker';
+
 
 export interface IPortProps {
 	name: string;
 	port: PortModel;
   node: NodeModel;
+  use?: UseType;
 }
 
 interface Colors {
@@ -28,6 +31,10 @@ const DEFAULT_COLORS = {
 };
 
 class _PortWidget extends React.Component<IPortProps, void> {
+  static defaultProps = {
+    use: 'diagram',
+  };
+  
   get mode() {
     return (() => {
       const {port} = this.props;
@@ -51,6 +58,12 @@ class _PortWidget extends React.Component<IPortProps, void> {
         return port.type;
       }
       return null;
+    })();
+  }
+
+  get cursor(): 'crosshair' | 'initial' {
+    return (() => {
+      return (this.props.use === 'diagram') ? 'crosshair' : 'initial';
     })();
   }
 
@@ -107,14 +120,14 @@ class _PortWidget extends React.Component<IPortProps, void> {
         case 'array':
         case 'object':
           return {
-            cursor: 'crosshair',
+            cursor: this.cursor,
           };
         default:
           return {
             borderRadius: '50%',
             borderWidth: 2,
             borderStyle: 'solid',
-            cursor: 'crosshair',
+            cursor: this.cursor,
             height: size,
             userSelect: 'none',
             width: size,
@@ -179,7 +192,7 @@ class _PortWidget extends React.Component<IPortProps, void> {
           borderColor: 'transparent transparent transparent white',
           borderStyle: 'solid',
           borderWidth: size,
-          cursor: 'crosshair',
+          cursor: this.cursor,
           left: 6,
           marginRight: 2,
           height: 0,
@@ -189,9 +202,9 @@ class _PortWidget extends React.Component<IPortProps, void> {
   }
 
 	render() {
-    const {name, node} = this.props;
+    const {name, node, use} = this.props;
     const className = cx({
-      'port': true,
+      'port': use === 'diagram',
     });
 
     return (

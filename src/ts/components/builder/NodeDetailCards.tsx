@@ -3,59 +3,52 @@ import * as Props from 'prop-types';
 import * as cx from 'classnames';
 import * as CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import {CSSProperties} from 'react';
-import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
+import {Card, CardActions, CardHeader} from 'material-ui/Card';
+import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
+import {DiagramEngine} from 'storm-react-diagrams';
+
+import {BaseNodeDetailCard} from './BaseNodeDetailCard';
 import {NodeModel} from '../ui/diagrams/NodeModel';
+import {ScrollableArea} from '../ui/ScrollableArea';
 import {ContainerRegistry, LogicContainer, UIContainer} from '../../lib';
+import {RemoveNode} from '../../lib/FlowEngine/diagramTriggers';
 import {BaseContainer} from '../../lib/BaseContainer';
 import {ActionPayloadMultiplexer} from '../../lib/containers';
 
 import '../../../scss/builder/node-detail-cards.scss';
 
+const BORDER = '1px solid rgba(0, 0, 0, 0.4)';
+
 interface INodeDetailCardsProps {
   node: NodeModel | null;
+  engine: DiagramEngine;
 }
 
 interface IContext {
   registry: ContainerRegistry;
 }
 
-function Row(props: any) {
-  const flexibleStyle: CSSProperties = {
-    flex: '0 0 auto',
-    flexWrap: 'nowrap',
-  }
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
-      <div style={flexibleStyle}>
-        {props.children[0]}
-      </div>
-
-      <div style={{flex: 1}} />
-
-      <div style={flexibleStyle}>
-        {props.children[1]}
-      </div>
-    </div>
-  );
+interface IState {
+  detailExpanded: boolean;
 }
 
-export class NodeDetailCards extends React.Component<INodeDetailCardsProps, void> {
+export class NodeDetailCards extends React.Component<INodeDetailCardsProps, IState> {
   static contextTypes = {
     registry: Props.object,
   };
 
   context: IContext;
+  state: IState = {
+    detailExpanded: true,
+  };
 
   private getRootStyle(): CSSProperties {
     return {
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
+      userSelect: 'none',
     };
   }
 
@@ -84,27 +77,76 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, void
     }
 
     return (
-      <div key="node-detail-card-root" style={this.getRootStyle()}>
-        {this.renderMetaCard(node)}
-      </div>
+      <ScrollableArea 
+        key="node-detail-card-root" 
+        style={this.getRootStyle()}
+        height="100%"
+      >
+        <div
+          style={{
+            pointerEvents: 'all',
+          }}
+        >
+          {this.renderMetaCard(node)}
+          {this.renderDetailCard(node)}
+        </div>
+      </ScrollableArea>
     );
   }
 
   private renderMetaCard(node: NodeModel) {
+    const {engine} = this.props;
     const {config} = node;
     const container = this.context.registry.getContainer(config.containerName);
+    const metaTitle = 
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <span 
+          style={{
+            border: BORDER,
+              padding: 1,
+              fontSize: 9,
+            verticalAlign: 'middle',
+            marginRight: 4,
+          }}
+        >
+          {this.renderContainerType(container)}
+        </span>
+        <span>
+          {config.containerName}
+        </span>
+      </div>
+    const metaSubtitle =
+      <div>
+        Step ID: {config.id}
+      </div>
     return (
       <Card>
         <CardHeader
-          title={config.containerName}
-          subtitle={`Step ID: ${config.id}`}
+          title={metaTitle}
+          subtitle={metaSubtitle}
         />
-        <CardText>
-          <Row>
-            <span>Type</span>
-            <span>{this.renderContainerType(container)}</span>
-          </Row>
-        </CardText>
+        <CardActions>
+          <RaisedButton
+            primary
+            label="Sample Page"
+            onClick={() => {
+              console.log('TODO show step container sample');// TODO
+            }}
+          />
+          <FlatButton
+            secondary
+            label="Delete"
+            onClick={() => {
+              const trigger = new RemoveNode(node);
+              trigger.trigger(engine);
+            }}
+          />
+        </CardActions>
       </Card>
     );
   }
@@ -117,5 +159,23 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, void
     } else {
       return 'Logic';
     }
+  }
+
+  private renderDetailCard(node: NodeModel) {
+    const {
+      detailExpanded,
+    } = this.state;
+    return (
+      <BaseNodeDetailCard
+        node={node}
+        expanded={detailExpanded}
+        style={{
+          marginTop: 4,
+        }}
+        onExpandChange={(e) => {
+          this.setState({detailExpanded: e});
+        }}
+      />
+    );
   }
 }

@@ -96,6 +96,10 @@ export const actions = {
   ) {
     return (dispatch: Dispatch<BuilderActionType>) => {
       const flowEngine = getFlowEngine(flow);
+      console.log({
+        change: linkChange,
+        isValid: linkChange.validate(flowEngine),
+      }); // fd
       if (flowEngine) {
         let stepConfigChange: IStepConfigMapChange = {};
         if (linkChange.validate(flowEngine)) {
@@ -107,6 +111,7 @@ export const actions = {
               flow.steps[id] = value;
             }
           });
+          console.log(flow.steps);//fd
         } else {
           dispatch(actions.setSnackMessage(linkChange.getInvalidReason()));
           linkChange.reject(flowEngine);

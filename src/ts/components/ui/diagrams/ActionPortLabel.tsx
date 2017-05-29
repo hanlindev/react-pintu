@@ -3,20 +3,23 @@ import * as React from 'react';
 import {ActionPortModel} from './ActionPortModel';
 import {PortWidget} from './PortWidget';
 import {ThemeableComponent} from '../ThemeableComponent';
+import {UseType} from './common';
 
 export interface IActionPortLabelProps {
   style?: React.CSSProperties;
   model: ActionPortModel;
+  use?: UseType;
 }
 
 export class ActionPortLabel extends ThemeableComponent<IActionPortLabelProps, void> {
   render() {
-    const {model, style, ...others} = this.props;
+    const {model, style, use, ...others} = this.props;
     const port = (
       <PortWidget 
         name={model.getName()} 
         port={model}
         node={model.getParent()} 
+        use={use}
       />
     );
     const label = model.getLabel();

@@ -132,6 +132,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       display: 'flex',
       flexFlow: 'row',
       height: '100%',
+      position: 'relative',
       width: '100%',
     };
   }
@@ -152,8 +153,10 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       flex: '0 0 auto',
       padding: 4,
       width: 400,
+      height: '100%',
       position: 'absolute',
       right: 0,
+      pointerEvents: 'none',
     }
   }
 
@@ -253,7 +256,10 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           />
         </div>
         <div style={this._getConfigurationTrayStyle()}>
-          <NodeDetailCards node={selectedNode} />
+          <NodeDetailCards 
+            engine={flowCanvas.diagramEngine}
+            node={selectedNode} 
+          />
         </div>
         <Snackbar
           open={!!snackMessage}

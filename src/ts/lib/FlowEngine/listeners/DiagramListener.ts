@@ -10,7 +10,7 @@ import {NodeModel, ActionPortModel} from '../../../components/ui/diagrams';
 export interface IDiagramEvents {
   onDiagramChange: (linkChange: IDiagramChange) => any;
   onSerializeDiagram: (serialized: string) => any;
-  onSelectionChange: (node: NodeModel) => any;
+  onSelectionChange: (node: NodeModel | null) => any;
 }
 
 export class DiagramListener implements DiagramModelListener, DiagramEngineListener {
@@ -39,6 +39,9 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
     } else {
       node.clearListeners();
       this.events.onDiagramChange(new NodeRemoved(node));
+      if (node.isSelected()) {
+        this.events.onSelectionChange(null);
+      }
     }
   }
 

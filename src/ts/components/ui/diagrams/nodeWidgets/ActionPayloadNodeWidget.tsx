@@ -22,6 +22,13 @@ export class ActionPayloadNodeWidget extends BaseNodeWidget {
       />
     ];
   }
+
+  protected getTitleStyle(): React.CSSProperties {
+    const style = super.getTitleStyle();
+    style.background =
+      'linear-gradient(to right, rgb(0, 169, 212), rgba(255, 255, 255, 0.2))';
+    return style;
+  }
   
   protected getRightPortLabels(): Array<JSX.Element> {
     const {node} = this.props;

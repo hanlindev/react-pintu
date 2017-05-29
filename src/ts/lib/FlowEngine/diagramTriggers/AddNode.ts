@@ -3,22 +3,22 @@ import {DiagramEngine} from 'storm-react-diagrams';
 import {IContainerSpec, IStepConfig, IFlow} from '../../interfaces';
 import {ContainerRegistry} from '../../ContainerRegistry';
 import {NodeModel} from '../../../components/ui/diagrams';
-import {IDiagramTrigger} from '../interfaces';
+import {BaseTrigger} from './BaseTrigger';
 
 interface IPosition {
   x: number,
   y: number,
 }
 
-export class AddNode implements IDiagramTrigger {
+export class AddNode extends BaseTrigger {
   private node: NodeModel;
-  private consumed: boolean = false;
 
   constructor(
     containerSpec: IContainerSpec,
     flow: IFlow,
     position: IPosition,
   ) {
+    super();
     const stepConfig = this.buildStepConfig(containerSpec, flow);
     this.node = new NodeModel(stepConfig, containerSpec);
     this.node.x = position.x;
@@ -45,11 +45,7 @@ export class AddNode implements IDiagramTrigger {
   }
 
   trigger(engine: DiagramEngine) {
-    if (this.consumed) {
-      throw new TypeError(
-        'The AddNode SRD event has been consumed. Do not reuse triggers!',
-      );
-    }
+    super.trigger(engine);
     engine.getDiagramModel().addNode(this.node);
   }
 }

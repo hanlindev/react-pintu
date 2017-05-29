@@ -137,7 +137,7 @@ export class NodeModel extends SRDNodeModel {
     const ports = this.getPorts();
     return Object.keys(ports).map((portName) => {
       const port = ports[portName];
-      if (port instanceof clazz) {
+      if (port instanceof clazz && port.constructor.name === clazz.name) {
         return port;
       }
       return null;

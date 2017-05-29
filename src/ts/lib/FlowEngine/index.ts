@@ -100,13 +100,23 @@ export class FlowEngine implements IFlowEngine {
     }
 
     if (typeof data === 'string') {
-      const result = this.stepNodes[data];
+      const nodeID = _.findKey(
+        this.diagramModel.getNodes(), 
+        (node: NodeModel) => {
+          return node.config.id === data;
+        },
+      );
+      if (!nodeID) {
+        throw new TypeError(`Node for step with ID - ${data} not found`);
+      }
+      return this.diagramModel.getNode(nodeID) as NodeModel;
+    } else {
+      const parentNode = data.getParent() as NodeModel;
+      const result = this.diagramModel.getNode(parentNode.getID());
       if (!result) {
         throw new TypeError(`Node for step with ID - ${data} not found`);
       }
-      return result;
-    } else {
-      return data.getParent() as NodeModel;  
+      return result as NodeModel;
     }
   }
   

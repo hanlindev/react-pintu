@@ -15,4 +15,5 @@ export interface ITypeChecker {
   toString(): string;
   toJSON(): string;
   validate(value: any): boolean;
+  getName(): string;
 }

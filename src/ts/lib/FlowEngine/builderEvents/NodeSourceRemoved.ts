@@ -42,8 +42,8 @@ export class NodeSourceRemoved implements IDiagramChange {
   }
 
   accept(engine: IFlowEngine): IStepConfigMapChange {
-    const srcNode = engine.getNodeRef(this.sourcePort);
-    if (srcNode) {
+    if (engine.hasNode(this.sourcePort)) {
+      const srcNode = engine.getNodeRef(this.sourcePort);
       const srcSpec: ISourceSpec = {
         linkID: this.link.getID(),
         stepID: srcNode.config.id,
@@ -64,24 +64,43 @@ export class NodeSourceRemoved implements IDiagramChange {
       };
     }
 
+    this.deleteInvalidSources(engine);
+    this.deleteInvalidInputSources(engine);
+
+    return {
+      [this.node.config.id]: this.node.config,
+    };
+  }
+
+  private deleteInvalidSources(engine: IFlowEngine) {
     // Node removal will cause this event to have no source node. Find all srcSpec
     // whose stepID lease to null node.
     const sources = this.node.config.sources;
     const removedSources = sources.filter((source) => {
-      try {
-        const stepConfig = engine.getNodeRef(source.stepID);
-        return !stepConfig;
-      } catch (e) {
-        return true;
-      }
+      return !engine.hasNode(source.stepID);
     });
     removedSources.forEach((source) => {
       _.remove(sources, (src) => _.isEqual(src, source));
     });
     this.node.config.sources = sources;
-    return {
-      [this.node.config.id]: this.node.config,
-    };
+  }
+
+  private deleteInvalidInputSources(engine: IFlowEngine) {
+    const inputSources = this.node.config.inputSources;
+    const removedKeys = Object.keys(inputSources).filter((inputName) => {
+      const source = inputSources[inputName];
+      switch (source.type) {
+        case 'actionPayload':
+          return !engine.hasNode(source.stepID);
+        case 'constant':
+        default:
+          return false;
+      }
+    });
+    removedKeys.forEach((key) => {
+      delete inputSources[key];
+    });
+    this.node.config.inputSources = inputSources;
   }
 
   reject(engine: IFlowEngine) {

@@ -12,6 +12,9 @@ import {ContainerRegistry} from '../lib/ContainerRegistry';
 import {getDefaultTheme, ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
 import {IBuilderEventHandlers} from '../lib/interfaces';
 
+import * as injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
+
 export interface IPintuProviderProps {
   appWrapper?: React.StatelessComponent<any>;
   builderUrlPrefix?: string;

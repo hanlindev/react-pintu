@@ -3,10 +3,12 @@ import * as React from 'react';
 import {PortWidget} from './PortWidget';
 import {InputPortModel} from './InputPortModel';
 import {ThemeableComponent} from '../ThemeableComponent';
+import {UseType} from './common';
 
 export interface IInputPortLabelProps {
   model: InputPortModel;
   style?: React.CSSProperties;
+  use?: UseType;
 }
 
 export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, void> {
@@ -26,12 +28,13 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
   }
 
   render() {
-    const {model, ...others} = this.props;
+    const {model, use, ...others} = this.props;
     const port = (
       <PortWidget 
         name={model.getName()} 
         port={model}
         node={model.getParent()}
+        use={use}
       />
     );
     const label = model.getLabel();

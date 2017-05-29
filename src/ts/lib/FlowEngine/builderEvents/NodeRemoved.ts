@@ -16,6 +16,7 @@ export class NodeRemoved implements IDiagramChange {
   }
 
   accept(engine: IFlowEngine): IStepConfigMapChange {
+    const model = engine.getDiagramModel();
     return {
       [this.node.config.id]: null,
     };
