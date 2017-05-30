@@ -1,9 +1,11 @@
-import {NodeModel} from '../ui/diagrams/NodeModel';
-import {PortLabel} from '../ui/diagrams/PortLabel';
-import {InputPortModel} from '../ui/diagrams/InputPortModel';
 import * as React from 'react';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
+import {ActionInputSource} from './ActionInputSource';
+import {NodeModel} from '../ui/diagrams/NodeModel';
+import {PortLabel} from '../ui/diagrams/PortLabel';
+import {InputPortModel} from '../ui/diagrams/InputPortModel';
+import {FlowEngine} from '../../lib';
 
 import {MiddleEmptyRow as Row} from '../ui/MiddleEmptyRow';
 
@@ -12,6 +14,7 @@ interface IBaseNodeDetailCardProps {
   style?: React.CSSProperties;
   expanded?: boolean;
   onExpandChange?: (expanded: boolean) => any;
+  flowEngine: FlowEngine;
 }
 
 export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps, void> {
@@ -61,7 +64,11 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
             height: 48,
           }}
         >
-          <div>
+          <div
+            style={{
+              width: 150,
+            }}
+          >
             <PortLabel
               model={input}
               use="others"
@@ -87,15 +94,19 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
           inputSources,
         }
       },
+      flowEngine,
     } = this.props;
     const source = inputSources[input.argName];
+    const width = 250;
 
     if (!source) {
       return (
         <TextField
+          autoFocus
           hintText={input.type().getName()}
           style={{
             height: 34,
+            width,
           }}
           hintStyle={{
             fontSize: 14,
@@ -113,8 +124,22 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
 
     switch (source.type) {
       case 'actionPayload':
+        const {
+          stepID,
+          actionID,
+          outputName,
+        } = source;
         return (
-          <div>
+          <div
+            style={{
+              width,
+            }}
+          >
+            <ActionInputSource 
+              inputPort={input}
+              sourceSpec={source}
+              flowEngine={flowEngine} 
+            />
           </div>
         );
       case 'constant':

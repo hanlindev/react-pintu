@@ -3,6 +3,7 @@ import {DiagramEngine, LinkModel} from 'storm-react-diagrams';
 import {Dispatch} from 'react-redux';
 import * as Immutable from 'immutable';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
+import {FlowEngine} from '../../lib/FlowEngine';
 import {ILinkSource, IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../../lib/interfaces';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
 import {BuilderActionType, SET_FLOW, UPDATE_STEP_CONFIGS, SET_SERIALIZED_DIAGRAM, SET_SNACK_MESSAGE, SET_SELECTED_NODE} from './common';
@@ -49,6 +50,13 @@ export class BuilderState extends BuilderRecord {
 
   getFlowClone(): IFlow | null{
     return _.cloneDeep(this.flow);
+  }
+
+  getFlowEngine(): FlowEngine | null {
+    if (this.flow) {
+      return FlowEngine.getEngine(this.flow);
+    }
+    return null;
   }
 
   getSteps(): {[key: string]: IStepConfig} {

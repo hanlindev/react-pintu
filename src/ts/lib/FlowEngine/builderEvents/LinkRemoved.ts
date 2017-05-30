@@ -1,7 +1,7 @@
 import {LinkModel} from 'storm-react-diagrams';
 import {IStepConfigMap} from '../../interfaces/flow';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
-import {ActionPortModel, EntrancePortModel} from '../../../components/ui/diagrams';
+import {ActionPortModel, EntrancePortModel, InputPortModel} from '../../../components/ui/diagrams';
 /**
  * Accept:
  * The source node's action's destination wll be deleted.
@@ -28,6 +28,14 @@ export class LinkRemoved implements IDiagramChange {
       delete node.config.destinations[sourcePort.action.id];
       result[node.config.id] = node.config;
     }
+
+    const targetPort = this.link.getTargetPort();
+    if (targetPort instanceof InputPortModel && engine.hasNode(targetPort)) {
+      const node = engine.getNodeRef(targetPort);
+      delete node.config.inputSources[targetPort.argName];
+      result[node.config.id] = node.config;
+    }
+
     return result;
   }
 

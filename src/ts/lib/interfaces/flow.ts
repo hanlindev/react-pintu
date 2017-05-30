@@ -21,17 +21,19 @@ export interface IActionPayload {
   [fieldName: string]: any;
 }
 
-export type IInputSource = 
-{
+export type IActionInputSource = {
   type: 'actionPayload',
   stepID: string;
   actionID: string;
   outputName: string;
-}
-| {
+};
+
+export type IConstantInputSource = {
   type: 'constant',
   value: any,
 };
+
+export type IInputSource = IActionInputSource | IConstantInputSource;
 
 export interface IInputSourceMap {
   [inputName: string]: IInputSource;

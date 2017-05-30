@@ -1,2 +1,3 @@
 export * from './AddNode';
-export * from './RemoveNode';
+export * from './RemoveModel';
+export * from './SelectModel';

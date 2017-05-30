@@ -4,6 +4,7 @@ import {PortWidget} from './PortWidget';
 import {InputPortModel} from './InputPortModel';
 import {ThemeableComponent} from '../ThemeableComponent';
 import {UseType} from './common';
+import {style} from '../../../lib/styles'; 
 
 export interface IInputPortLabelProps {
   model: InputPortModel;
@@ -17,6 +18,8 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
       display: 'inline-block',
       verticalAlign: 'top',
       marginLeft: this.context.theme.spacing.tiny,
+      flex: 1,
+      ...style('ellipsis'),
     };
 
     const {model} = this.props;
@@ -28,7 +31,7 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
   }
 
   render() {
-    const {model, use, ...others} = this.props;
+    const {model, use, style, ...others} = this.props;
     const port = (
       <PortWidget 
         name={model.getName()} 
@@ -40,10 +43,17 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
     const label = model.getLabel();
 
     return (
-      <div {...others}>
+      <div 
+        style={{
+          ...style,
+          width: '100%',
+          display: 'flex',
+        }}
+        {...others}
+      >
         <div
           style={{
-            display: 'inline-block',
+            flex: '0 0 auto',
           }}
         >
           {port}

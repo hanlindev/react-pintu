@@ -28,7 +28,7 @@ export class NodeListener implements BaseModelListener {
     return result;
   }
 
-  selectionChanged(item: NodeModel, isSelected: boolean): void {
+  selectionChanged = (item: NodeModel, isSelected: boolean) => {
     let selectedNode = null;
     if (isSelected && (this.previouslySelected || this.isDoubleClick())) {
       this.previouslySelected = true;

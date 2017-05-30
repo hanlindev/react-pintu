@@ -52,6 +52,7 @@ export class SampleView extends UIContainer {
           type: 'endOfStep',
           payload: {
             strArg: Types.string.isRequired,
+            numArg: Types.number.isRequired,
           }
         },
       },

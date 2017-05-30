@@ -120,7 +120,9 @@ class _PortWidget extends React.Component<IPortProps, void> {
         case 'array':
         case 'object':
           return {
+            height: 13,
             cursor: this.cursor,
+            width: 13,
           };
         default:
           return {

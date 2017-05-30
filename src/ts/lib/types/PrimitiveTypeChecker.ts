@@ -58,11 +58,24 @@ export class PrimitiveTypeChecker implements ITypeChecker {
     }
   }
 
-  isEqual(other: ITypeChecker | undefined): boolean {
-    return (
-      other instanceof PrimitiveTypeChecker
-      && this.toString() === other.toString()
-    );
+  satisfy(other: ITypeChecker | undefined): boolean {
+    if (!(other instanceof PrimitiveTypeChecker)) {
+      return false;
+    }
+
+    const otherString = other.toString();
+    const exactEqual = this.toString() === otherString;
+    if (exactEqual) {
+      return true;
+    }
+
+    if (this.required) {
+      const notRequiredVersion = 
+        PrimitiveTypeChecker.getFactory(this.type)().toString();
+      return notRequiredVersion === otherString;
+    }
+
+    return false;
   }
 
   isRequired(): boolean {

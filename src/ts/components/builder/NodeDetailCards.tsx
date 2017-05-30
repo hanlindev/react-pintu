@@ -6,13 +6,12 @@ import {CSSProperties} from 'react';
 import {Card, CardActions, CardHeader} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
-import {DiagramEngine} from 'storm-react-diagrams';
 
 import {BaseNodeDetailCard} from './BaseNodeDetailCard';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ScrollableArea} from '../ui/ScrollableArea';
-import {ContainerRegistry, LogicContainer, UIContainer} from '../../lib';
-import {RemoveNode} from '../../lib/FlowEngine/diagramTriggers';
+import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine} from '../../lib';
+import {RemoveModel} from '../../lib/FlowEngine/diagramTriggers';
 import {BaseContainer} from '../../lib/BaseContainer';
 import {ActionPayloadMultiplexer} from '../../lib/containers';
 
@@ -22,7 +21,7 @@ const BORDER = '1px solid rgba(0, 0, 0, 0.4)';
 
 interface INodeDetailCardsProps {
   node: NodeModel | null;
-  engine: DiagramEngine;
+  flowEngine: FlowEngine;
 }
 
 interface IContext {
@@ -95,9 +94,10 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
   }
 
   private renderMetaCard(node: NodeModel) {
-    const {engine} = this.props;
+    const {flowEngine} = this.props;
     const {config} = node;
     const container = this.context.registry.getContainer(config.containerName);
+    const engine = flowEngine.getDiagramEngine();
     const metaTitle = 
       <div
         style={{
@@ -142,7 +142,7 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
             secondary
             label="Delete"
             onClick={() => {
-              const trigger = new RemoveNode(node);
+              const trigger = new RemoveModel(node);
               trigger.trigger(engine);
             }}
           />
@@ -175,6 +175,7 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
         onExpandChange={(e) => {
           this.setState({detailExpanded: e});
         }}
+        flowEngine={this.props.flowEngine}
       />
     );
   }

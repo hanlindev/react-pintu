@@ -5,7 +5,7 @@ import {LinkListener} from './LinkListener';
 import {NodeListener} from './NodeListener';
 import {IDiagramChange} from '../interfaces';
 import {LinkAdded, LinkRemoved, NodeAdded, NodeRemoved, NodeSourceRemoved} from '../builderEvents';
-import {NodeModel, ActionPortModel} from '../../../components/ui/diagrams';
+import {NodeModel, ActionPortModel, EntrancePortModel, InputPortModel} from '../../../components/ui/diagrams';
 
 export interface IDiagramEvents {
   onDiagramChange: (linkChange: IDiagramChange) => any;
@@ -58,10 +58,12 @@ export class DiagramListener implements DiagramModelListener, DiagramEngineListe
         const srcPort = link.getSourcePort() as ActionPortModel;
         const targetPort = link.getTargetPort();
         if (srcPort && targetPort) {
-          const targetNode = targetPort.getParent() as NodeModel;
-          this.events.onDiagramChange(
-            new NodeSourceRemoved(targetNode, link),
-           );
+          if (targetPort instanceof EntrancePortModel) {
+            const targetNode = targetPort.getParent() as NodeModel;
+            this.events.onDiagramChange(
+              new NodeSourceRemoved(targetNode, link),
+            );
+          } 
         }
       })
     }

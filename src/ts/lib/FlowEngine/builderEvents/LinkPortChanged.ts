@@ -113,7 +113,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
     if (
       srcPort instanceof OutputPortModel
       && this._port instanceof InputPortModel
-      && !srcPort.type().isEqual(this._port.type())
+      && !srcPort.type().satisfy(this._port.type())
     ) {
       this.invalidReason =
         "Output's and input's types must be the same";

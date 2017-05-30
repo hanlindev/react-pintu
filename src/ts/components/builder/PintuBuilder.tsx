@@ -28,6 +28,7 @@ interface IParams {
 
 interface IFlowCanvas {
   flow: IFlow;
+  flowEngine: FlowEngine;
   diagramEngine: DiagramEngine;
 }
 
@@ -153,7 +154,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       boxSizing: 'border-box',
       flex: '0 0 auto',
       padding: 4,
-      width: 400,
+      width: 450,
       height: '100%',
       position: 'absolute',
       right: 0,
@@ -258,7 +259,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
         </div>
         <div style={this._getConfigurationTrayStyle()}>
           <NodeDetailCards 
-            engine={flowCanvas.diagramEngine}
+            flowEngine={flowCanvas.flowEngine}
             node={selectedNode} 
           />
         </div>
@@ -280,12 +281,14 @@ export function createBuilder(
   FlowEngine.setRegistry(registry);
   return connect((state: IState) => {
     const flow = state.builder.getFlowClone();
+    const flowEngine = state.builder.getFlowEngine();
     const diagramEngine = (flow) ? getDiagramEngine(flow) : null;
     let flowCanvas = {};
-    if (flow && diagramEngine) {
+    if (flow && diagramEngine && flowEngine) {
       flowCanvas = {
         flowCanvas: {
           flow,
+          flowEngine,
           diagramEngine,
         },
       };

@@ -9,7 +9,7 @@ export interface Requireable extends TypeCheckerFactory {
 }
 
 export interface ITypeChecker {
-  isEqual(other: ITypeChecker): boolean;
+  satisfy(other: ITypeChecker): boolean;
   isRequired(): boolean;
   toPropType(): ReactPropType;
   toString(): string;
