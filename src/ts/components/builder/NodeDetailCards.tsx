@@ -8,6 +8,7 @@ import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 
 import {BaseNodeDetailCard} from './BaseNodeDetailCard';
+import {ActionPayloadNodeDetailCard} from './ActionPayloadNodeDetailCard';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ScrollableArea} from '../ui/ScrollableArea';
 import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine} from '../../lib';
@@ -165,18 +166,39 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
     const {
       detailExpanded,
     } = this.state;
-    return (
-      <BaseNodeDetailCard
-        node={node}
-        expanded={detailExpanded}
-        style={{
-          marginTop: 4,
-        }}
-        onExpandChange={(e) => {
-          this.setState({detailExpanded: e});
-        }}
-        flowEngine={this.props.flowEngine}
-      />
-    );
+    const {
+      registry,
+    } = this.context;
+    const container = registry.getContainer(node.config.containerName);
+
+    if (container instanceof ActionPayloadMultiplexer) {
+      return (
+        <ActionPayloadNodeDetailCard
+          node={node}
+          expanded={detailExpanded}
+          style={{
+            marginTop: 4,
+          }}
+          onExpandChange={(e) => {
+            this.setState({detailExpanded: e});
+          }}
+          flowEngine={this.props.flowEngine}
+        />
+      );
+    } else {
+      return (
+        <BaseNodeDetailCard
+          node={node}
+          expanded={detailExpanded}
+          style={{
+            marginTop: 4,
+          }}
+          onExpandChange={(e) => {
+            this.setState({detailExpanded: e});
+          }}
+          flowEngine={this.props.flowEngine}
+        />
+      );
+    }
   }
 }

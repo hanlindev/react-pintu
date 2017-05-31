@@ -193,4 +193,12 @@ export class FlowEngine implements IFlowEngine {
   repaintCanvas() {
     this.diagramEngine.repaintCanvas();
   }
+
+  getOnlyLink(port: PortModel): LinkModel | null {
+    const linkKeys = Object.keys(port.getLinks());
+    if (linkKeys.length > 1) {
+      throw new TypeError(`Port ${port.getID()} has ${linkKeys.length} links`);
+    }
+    return (linkKeys.length === 0) ? null : port.getLinks()[linkKeys[0]];
+  }
 }
