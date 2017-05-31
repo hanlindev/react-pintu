@@ -1,11 +1,15 @@
 import * as _ from 'lodash';
-import {AbstractInstanceFactory, DiagramModel, LinkModel, NodeModel as SRDNodeModel, PortModel} from 'storm-react-diagrams';
+import {AbstractInstanceFactory, DiagramModel, LinkModel, NodeModel as SRDNodeModel, PortModel, BaseModelListener} from 'storm-react-diagrams';
 import {InputPortModel} from './InputPortModel';
 import {ActionPortModel} from './ActionPortModel';
 import {EntrancePortModel} from './EntrancePortModel';
 import {OutputPortModel} from './OutputPortModel';
 import {IStepConfig, IActionsDeclaration, IContainerSpec, TypeCheckerFactory} from '../../../lib/interfaces';
 import {preparePayloadDeclarationSerialize, deSerializePayloadDeclaration} from '../../../lib/types';
+
+export interface INodeModelListeners extends BaseModelListener {
+  nodeConfigChanged?: (node: NodeModel, newConfig: IStepConfig) => any;
+}
 
 export class NodeModel extends SRDNodeModel {
   private _config: IStepConfig;
@@ -23,6 +27,31 @@ export class NodeModel extends SRDNodeModel {
     if (config && container) {
       this.setData(config, container);
     }
+  }
+
+  addListener(listeners: INodeModelListeners) {
+    return super.addListener(listeners);
+  }
+
+  /**
+   * DO NOT call this method in IDiagramChange's accept method. You should 
+   * directly assign the new config to the node and return the config as changed
+   * step config map.
+   */
+  setConfig(config: IStepConfig) {
+    // Basic validation: the container name can't be changed.
+    if (config.containerName !== this.container.name) {
+      throw new TypeError("Unable to change existing config's container name");
+    }
+    this._config = config;
+    this.iterateListeners((listener) => {
+      const {nodeConfigChanged} = listener;
+      nodeConfigChanged && nodeConfigChanged(this, config);
+    });
+  }
+
+  iterateListeners(cb: (listeners: INodeModelListeners) => any) {
+    super.iterateListeners(cb);
   }
 
   setData(config: IStepConfig, container: IContainerSpec) {
@@ -191,7 +220,8 @@ export class NodeModel extends SRDNodeModel {
     }
 
     if (destConfig.type === 'step' && destConfig.stepID === destNode.id) {
-      // TODO Only support in-flow connection for now, implement in future
+      // TODO Only support in-flow connection for now, implement out-flow 
+      // in future
       const srcActionPort = this.getActionPortWithID(actionId);
       if (!srcActionPort) {
         throw new TypeError(

@@ -11,7 +11,7 @@ import {SelectModel, RemoveModel} from '../../lib/FlowEngine/diagramTriggers';
 
 const ROW_WIDTH = 250;
 const MAKE_CONSTANT_WIDTH = 93;
-const GAP = 2;
+const GAP = 8;
 const GO_TO_NODE_WIDTH = ROW_WIDTH - MAKE_CONSTANT_WIDTH - GAP;
 
 interface IActionInputSourceProps {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
-import TextField from 'material-ui/TextField';
 import {ActionInputSource} from './ActionInputSource';
+import {ConstantInputSource} from './ConstantInputSource';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {PortLabel} from '../ui/diagrams/PortLabel';
 import {InputPortModel} from '../ui/diagrams/InputPortModel';
@@ -89,65 +89,44 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
   
   private renderInputSource(input: InputPortModel) {
     const {
-      node: {
-        config: {
-          inputSources,
-        }
-      },
+      node,
       flowEngine,
     } = this.props;
+    const {
+      config: {
+        inputSources,
+      }
+    } = node;
     const source = inputSources[input.argName];
     const width = 250;
 
-    if (!source) {
+    if (!source || source.type === 'constant') {
       return (
-        <TextField
-          autoFocus
-          hintText={input.type().getName()}
+        <ConstantInputSource
+          input={input}
+          sourceSpec={source}
+          flowEngine={flowEngine}
           style={{
-            height: 34,
             width,
           }}
-          hintStyle={{
-            fontSize: 14,
-            bottom: 5,
-          }}
-          inputStyle={{
-            fontSize: 14,
-          }}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-          }}
+          inputName={input.argName}
+          node={node}
         />
       );
     }
 
-    switch (source.type) {
-      case 'actionPayload':
-        const {
-          stepID,
-          actionID,
-          outputName,
-        } = source;
-        return (
-          <div
-            style={{
-              width,
-            }}
-          >
-            <ActionInputSource 
-              inputPort={input}
-              sourceSpec={source}
-              flowEngine={flowEngine} 
-            />
-          </div>
-        );
-      case 'constant':
-      default:
-        return (
-          <div>
-          </div>
-        );
-    }
+    return (
+      <div
+        style={{
+          width,
+        }}
+      >
+        <ActionInputSource 
+          inputPort={input}
+          sourceSpec={source}
+          flowEngine={flowEngine} 
+        />
+      </div>
+    );
   }
 }

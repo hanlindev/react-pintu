@@ -1,13 +1,16 @@
-import {BaseModelListener} from 'storm-react-diagrams';
-import {NodeModel} from '../../../components/ui/diagrams';
+import {NodeModel, INodeModelListeners} from '../../../components/ui/diagrams';
+import {NodeConfigChanged} from '../builderEvents';
+import {IDiagramChange} from '../interfaces';
+import {IStepConfig} from '../../interfaces';
 
 const DOUBLE_CLICK_INTERVAL = 300;
 
 export interface INodeEvents {
-  onSelectionChange: (node: NodeModel | null) => void;
+  onDiagramChange: (change: IDiagramChange) => any;
+  onSelectionChange: (node: NodeModel | null) => any;
 }
 
-export class NodeListener implements BaseModelListener {
+export class NodeListener implements INodeModelListeners {
   prevClickTime: number = Date.now();
   previouslySelected: boolean = false;
 
@@ -41,4 +44,8 @@ export class NodeListener implements BaseModelListener {
 
   entityRemoved(item: any): void {
   }
+
+  nodeConfigChanged = (node: NodeModel, config: IStepConfig) => {
+    this.events.onDiagramChange(new NodeConfigChanged(node, config));
+  };
 }
