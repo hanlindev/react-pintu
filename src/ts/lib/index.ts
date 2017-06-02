@@ -1,4 +1,5 @@
 export * from './ContainerRegistry';
+export * from './containers';
 export * from './FlowEngine';
 export * from './History';
 export * from './interfaces';

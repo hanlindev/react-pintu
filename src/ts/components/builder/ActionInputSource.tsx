@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 import * as React from 'react';
 import FlatButton from 'material-ui/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
 
 import {InputPortModel} from '../ui/diagrams/InputPortModel';
 import {FlowEngine} from '../../lib';
@@ -10,7 +9,7 @@ import {IActionInputSource} from '../../lib/interfaces';
 import {SelectModel, RemoveModel} from '../../lib/FlowEngine/diagramTriggers';
 
 const ROW_WIDTH = 250;
-const MAKE_CONSTANT_WIDTH = 93;
+const MAKE_CONSTANT_WIDTH = 113;
 const GAP = 8;
 const GO_TO_NODE_WIDTH = ROW_WIDTH - MAKE_CONSTANT_WIDTH - GAP;
 
@@ -49,25 +48,21 @@ export class ActionInputSource extends React.Component<IActionInputSourceProps, 
           marginRight: GAP,
         }}
       >
-        <RaisedButton
+        <FlatButton
           primary={true}
           onClick={() => this.onClickSource()}
+          label={this.renderSourceLabel()}
           style={{
             textAlign: 'left',
             width: GO_TO_NODE_WIDTH,
           }}
-        >
-          <div
-            style={{
-              color: 'white',
-              width: '100%',
-              ...style('ellipsis'),
-              ...style('paddingVert', 2),
-            }}
-          >
-            {this.renderSourceLabel()}
-          </div>
-        </RaisedButton>
+          labelStyle={{
+            width: '100%',
+            textTransform: 'none',
+            ...style('ellipsis'),
+            ...style('paddingVert', 2),
+          }}
+        />
       </div>
     );
   }
@@ -110,9 +105,13 @@ export class ActionInputSource extends React.Component<IActionInputSourceProps, 
               (new RemoveModel(link)).trigger(flowEngine.getDiagramEngine());
             });
           }}
-        >
-          Make constant
-        </FlatButton>
+          label="Make Constant"
+          fullWidth={true}
+          labelStyle={{
+            textTransform: 'none',
+            ...style('paddingVert', 4),
+          }}
+        />
       </div>
     );
   }

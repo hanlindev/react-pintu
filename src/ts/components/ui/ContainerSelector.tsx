@@ -8,7 +8,7 @@ import {ScrollableArea} from './ScrollableArea';
 import {ThemeableComponent} from './ThemeableComponent';
 import {ContainerRegistry} from '../../lib/ContainerRegistry';
 import {IContainerSpec, IContainerSpecMap, IFlow} from '../../lib/interfaces';
-import {UIContainer, LogicContainer} from '../../lib';
+import {UIContainer, LogicContainer, ActionPayloadMultiplexer} from '../../lib';
 import {AddNode} from '../../lib/FlowEngine/diagramTriggers';
 import {camelToWords} from '../../lib/utils';
 
@@ -215,7 +215,9 @@ class _ContainerSelector
       const containerSpec = containers[name];
       const container = this.props.registry.getContainer(name);
       let containerType;
-      if (container instanceof UIContainer) {
+      if (container instanceof ActionPayloadMultiplexer) {
+        containerType = 'M';
+      } else if (container instanceof UIContainer) {
         containerType = 'U';
       } else if (container instanceof LogicContainer) {
         containerType = 'L';
@@ -230,11 +232,15 @@ class _ContainerSelector
         >
           <span
             style={{
+              boxSizing: 'border-box',
               border: `1px solid ${COLOR}`,
               borderRadius: 2,
+              display: 'inline-block',
               fontSize: 8,
               padding: 2,
               marginRight: tiny,
+              width: 13,
+              textAlign: 'center',
             }}
           >
             {containerType}

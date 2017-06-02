@@ -6,6 +6,7 @@ interface ICSSPropertiesGetter {
 }
 const PresetStyles: {[key: string]: CSSProperties | ICSSPropertiesGetter} = {
   ellipsis: {
+    display: 'block',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',

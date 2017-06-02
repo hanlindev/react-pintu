@@ -109,9 +109,6 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     if (flowID) {
       this.loadFlowData(flowID);
     }
-    // window.addEventListener('keyup', (e) => {
-    //   e.stopImmediatePropagation();
-    // });
   }
 
   componentWillReceiveProps(nextProps: IPintuBuilderProps) {

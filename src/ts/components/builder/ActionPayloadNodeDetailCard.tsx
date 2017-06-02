@@ -8,6 +8,9 @@ import {FlowEngine} from '../../lib/FlowEngine';
 import {SelectModel} from '../../lib/FlowEngine/diagramTriggers';
 import {style} from '../../lib/styles';
 
+const LEFT_WIDTH = 150;
+const RIGHT_WIDTH = 250;
+
 interface IActionPayloadNodeDetailCardProps {
   node: NodeModel;
   style?: React.CSSProperties;
@@ -40,12 +43,11 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
         <CardText
           expandable={true}
         >
-          <Row
-          >
-            <div>
+          <Row>
+            <div style={{width: LEFT_WIDTH}}>
               Source Action
             </div>
-            <div>
+            <div style={{width: RIGHT_WIDTH}}>
               {this.renderSourceButton()}
             </div>
           </Row>
@@ -71,6 +73,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
             (new SelectModel(srcNode)).trigger(flowEngine.getDiagramEngine());
           }}
           label={label}
+          labelStyle={{textTransform: 'none'}}
         />
       );
     }
@@ -81,18 +84,17 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
   private renderOutputDetails() {
     const {node, flowEngine} = this.props;
     const outputPorts = node.getOutputPortModels();
-    return outputPorts.map((output, i) => {
+    return outputPorts.map((output) => {
       return (
         <Row
           key={output.getID()}
           style={{
-            marginTop: (i > 0) ? 8 : 0,
             height: 48,
           }}
         >
           <div
             style={{
-              width: 150,
+              width: LEFT_WIDTH,
             }}
           >
             <InputPortLabel
@@ -101,7 +103,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
             />
           </div>
           
-          <div>
+          <div style={{width: RIGHT_WIDTH}}>
             {this.renderOutputDestinationButton(output)}
           </div>
         </Row>
@@ -126,9 +128,14 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
               .trigger(flowEngine.getDiagramEngine());
           }}
           label={label}
+          labelStyle={{textTransform: 'none'}}
         />
       );
     }
-    return 'Not connected with any input';
+    return (
+      <div style={style('paddingVert', 16)}>
+        Not connected with any input
+      </div>
+    );
   }
 }
