@@ -23,6 +23,8 @@ class PintuSample extends React.Component<{}, void> {
           builtInRegistry,
         )}
         builderEventHandlers={SampleServerAPI}
+        runnerEventHandlers={SampleServerAPI}
+        runnerUrlTemplate="/:stepID:containerPathTemplate"
       />
     );
   }

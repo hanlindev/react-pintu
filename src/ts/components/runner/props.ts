@@ -1,9 +1,7 @@
-import {IStep} from '../../reducers/runner';
-import {IContainerSpec, IActionCallback} from '../../lib';
+import {IContainerSpec, IActionCallback, IStepConfig} from '../../lib';
 
 export interface IPintuRunnerProps {
-  query: any;
+  container: IContainerSpec;
   inputs: any;
-  step: IStep;
   onAction: IActionCallback;
 }

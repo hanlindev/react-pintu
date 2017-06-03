@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 import {ActionInputSource} from './ActionInputSource';
 import {ConstantInputSource} from './ConstantInputSource';
+import {CommonNodeDetail} from './CommonNodeDetail';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {PortLabel} from '../ui/diagrams/PortLabel';
 import {InputPortModel} from '../ui/diagrams/InputPortModel';
@@ -46,6 +47,12 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
         <CardText
           expandable={true}
         >
+          <CommonNodeDetail 
+            style={{
+              marginTop: 8,
+            }}
+            node={node} 
+          />
           {this.renderInputDetails()}
         </CardText>
       </Card>

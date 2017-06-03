@@ -39,7 +39,6 @@ export class AddNode extends BaseTrigger {
       containerName: containerSpec.name,
       destinations: {},
       sources: [],
-      actionPayloads: {},
       inputSources: {},
     };
   }

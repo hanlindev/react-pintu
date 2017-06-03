@@ -9,8 +9,9 @@ import {createRunner} from './runner';
 import {createBuilder} from './builder/PintuBuilder';
 import {history, store} from '../lib/History';
 import {ContainerRegistry} from '../lib/ContainerRegistry';
+import {fillString} from '../lib/utils';
 import {getDefaultTheme, ITheme, IThemeContext, ThemeContextProps} from './ui/ThemeableComponent';
-import {IBuilderEventHandlers} from '../lib/interfaces';
+import {IBuilderEventHandlers, IRunnerEventHandlers} from '../lib/interfaces';
 
 import * as injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
@@ -20,8 +21,10 @@ export interface IPintuProviderProps {
   builderUrlPrefix?: string;
   builderEventHandlers: IBuilderEventHandlers;
   canUseBuilder?: boolean;
-  theme?: Pick<ITheme, any>;
   containerRegistry: ContainerRegistry;
+  runnerEventHandlers: IRunnerEventHandlers;
+  runnerUrlTemplate?: string;
+  theme?: Pick<ITheme, any>;
 }
 
 const DEFAULT_CONTEXT: IThemeContext = {
@@ -36,6 +39,7 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
     appWrapper: (props: any) => <div>props.children</div>,
     canUseBuilder: false,
     builderUrlPrefix: '/builder',
+    runnerUrlTemplate: '/:flowID/:stepID:containerPathTemplate',
     theme: {},
   };
 
@@ -57,19 +61,27 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
 
   render() {
     const {
-      builderUrlPrefix, 
+      builderUrlPrefix,
       appWrapper, 
       children, 
       containerRegistry,
+      runnerEventHandlers,
+      runnerUrlTemplate,
     } = this.props;
     const routes = _.map(
       containerRegistry.containerSpecs,
       (spec, name) => {
+        const path = fillString(
+          runnerUrlTemplate as string,
+          {
+            containerPathTemplate: spec.pathTemplate,
+          },
+        );
         return (
           <Route 
             key={name}
-            path={spec.pathTemplate} 
-            component={createRunner(spec, containerRegistry)}
+            path={path} 
+            component={createRunner(spec, containerRegistry, runnerEventHandlers)}
           />
         );
       }

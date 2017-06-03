@@ -13,6 +13,7 @@ export interface ITypeChecker {
   isRequired(): boolean;
   toPropType(): ReactPropType;
   toString(): string;
+  isSerializable(): boolean;
   toJSON(): string;
   validate(value: any): boolean;
   getName(): string;

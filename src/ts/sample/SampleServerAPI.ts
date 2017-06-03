@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as qs from 'qs';
 
-import {IFlowMetaData, IFlow, FlowSaveResultType} from '../.';
+import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams} from '../.';
 
 const DefaultFlow: IFlow = {
   id: '1',
@@ -15,9 +15,7 @@ const DefaultFlow: IFlow = {
       id: '0',
       containerName: 'SampleView',
       sources: [],
-      destinations: {
-      },
-      actionPayloads: {},
+      destinations: {},
       inputSources: {},
     },
     1: {
@@ -25,7 +23,6 @@ const DefaultFlow: IFlow = {
       containerName: 'SampleView',
       sources: [],
       destinations: {},
-      actionPayloads: {},
       inputSources: {},
     }
   },
@@ -72,9 +69,16 @@ function onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
   });
 }
 
+function onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<IFlow> {
+  return new Promise<IFlow>((resolve) => {
+    resolve(DefaultFlow);
+  });
+}
+
 export {
   onCreateFlow,
   onLoadFlow,
   onAutoSaveFlow,
   onUserSaveFlow,
+  onRunnerLoadFlow,
 }

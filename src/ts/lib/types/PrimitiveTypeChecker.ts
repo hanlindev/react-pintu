@@ -37,18 +37,20 @@ export class PrimitiveTypeChecker implements ITypeChecker {
   }
 
   getName(): string {
-    const name = `${_.upperFirst(this.type)} ${this.getExample()}`;
-    return (this.required) ? `${name} (required)` : name;
+    return `${_.upperFirst(this.type)} ${this.getExample()}`;
   }
 
   getExample(): string {
+    const defaultSource = (this.required)
+      ? ' (Default from URL)'
+      : '';
     switch (this.type) {
       case 'number':
-        return 'e.g. 1, 2, 3';
+        return 'e.g. 1, 2, 3' + defaultSource;
       case 'boolean':
-        return 'e.g. true, false';
+        return 'e.g. true' + defaultSource;
       case 'string':
-        return "e.g. 'abc'";
+        return "e.g. 'abc'" + defaultSource;
       case 'object':
         return "e.g. {a: 1, b: 'c'}";
       case 'array':
@@ -56,6 +58,10 @@ export class PrimitiveTypeChecker implements ITypeChecker {
       default:
         return '';
     }
+  }
+
+  isSerializable(): boolean {
+    return ['number', 'boolean', 'string'].indexOf(this.type) >= 0;
   }
 
   satisfy(other: ITypeChecker | undefined): boolean {

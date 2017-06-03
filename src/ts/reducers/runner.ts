@@ -1,44 +1,63 @@
 import * as Immutable from 'immutable';
+import {IStepPayloadMap, IStepConfig, IFlow} from '../lib/interfaces';
 
 const RunnerRecord = Immutable.Record({
-  query: {},
-  snowball: {},
-  step: null,
+  stepPayloads: Immutable.Map(),
+  flow: null,
+  stepID: null,
 });
 
-export interface IStep {
-
-}
+type ImmutableActionPayloadMap = Immutable.Map<string, Object>;
+type ImmutableStepPayloadMap = Immutable.Map<string, ImmutableActionPayloadMap>;
 
 export class RunnerState extends RunnerRecord {
-  query: any;
-  snowball: any;
-  step: IStep | null;
+  stepPayloads: ImmutableStepPayloadMap;
+  flow: IFlow | null;
+  stepID: string | null;
 
-  setQuery(query: any) {
-    return this.set('query', query);
+  setStepPayload(stepID: string, actionID: string, payloads: any) {
+    this.setIn(['stepPayloads', stepID, actionID], payloads);
   }
 
-  mergeSnowball(snowball: any) {
-    return this.set('snowball', {
-      ...this.snowball,
-      ...snowball,
-    });
+  getStepPayloadMap(): IStepPayloadMap {
+    return this.stepPayloads.toJS();
+  }
+
+  setStepID(stepID: string) {
+    return this.set('stepID', stepID);
+  }
+
+  setFlow(flow: IFlow) {
+    return this.set('flow', flow);
+  }
+
+  getStepConfig(): IStepConfig | null {
+    if (!this.flow || this.stepID === null) {
+      return null;
+    }
+    return this.flow.steps[this.stepID];
   }
 }
 
-const SET_QUERY = 'runner.setQuery';
-const MERGE_SNOWBALL = 'runner.mergeSnowball';
+const SET_FLOW = 'runner.setFlow';
+const SET_STEP_ID = 'runner.setStepID';
+const SET_STEP_PAYLOAD = 'runner.setStepPayload';
 
-type RunnerActionType =
+export type RunnerActionType =
 {
-  type: 'runner.setQuery',
-  query: any,
+  type: 'runner.setFlow',
+  flow: IFlow,
 }
 | {
-  type: 'runner.mergeSnowball',
-  snowball: any,
-};
+  type: 'runner.setStepID',
+  stepID: string,
+}
+| {
+  type: 'runner.setStepPayload',
+  stepID: string,
+  actionID: string,
+  payload: any,
+}
 
 export function runner(state: RunnerState, action: RunnerActionType) {
   if (!state) {
@@ -46,27 +65,46 @@ export function runner(state: RunnerState, action: RunnerActionType) {
   }
 
   switch (action.type) {
-    case SET_QUERY:
-      return state.setQuery(action.query);
-    case MERGE_SNOWBALL:
-      return state.mergeSnowball(action.snowball);
+    case SET_FLOW:
+      return state.setFlow(action.flow);
+    case SET_STEP_ID:
+      return state.setStepID(action.stepID);
+    case SET_STEP_PAYLOAD:
+      return state.setStepPayload(
+        action.stepID,
+        action.actionID,
+        action.payload,
+      );
   }
 
   return state;
 }
 
 export const actions = {
-  setQuery(query: any): RunnerActionType {
+  setFlow(flow: IFlow): RunnerActionType {
     return {
-      type: SET_QUERY,
-      query,
+      type: SET_FLOW,
+      flow,
     };
   },
 
-  mergeSnowball(snowball: any): RunnerActionType {
+  setStepID(id: string): RunnerActionType {
     return {
-      type: MERGE_SNOWBALL,
-      snowball,
+      type: SET_STEP_ID,
+      stepID: id,
+    };
+  },
+
+  setStepPayload(
+    stepID: string, 
+    actionID: string, 
+    payload: any,
+  ): RunnerActionType {
+    return {
+      type: SET_STEP_PAYLOAD,
+      stepID,
+      actionID,
+      payload,
     };
   }
 };

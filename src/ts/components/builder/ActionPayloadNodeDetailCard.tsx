@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 
+import {CommonNodeDetail} from './CommonNodeDetail';
 import {ActionPortModel, NodeModel, InputPortLabel, InputPortModel, OutputPortModel} from '../ui/diagrams';
 import {MiddleEmptyRow as Row} from '../ui/MiddleEmptyRow';
 import {FlowEngine} from '../../lib/FlowEngine';
@@ -24,6 +25,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
     const {
       expanded,
       style,
+      node,
       onExpandChange
     } = this.props;
 
@@ -43,6 +45,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
         <CardText
           expandable={true}
         >
+          <CommonNodeDetail node={node} />
           <Row>
             <div style={{width: LEFT_WIDTH}}>
               Source Action
