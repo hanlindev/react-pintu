@@ -1,3 +1,4 @@
+import {Dispatch} from 'react-redux';
 import * as Immutable from 'immutable';
 import {IStepPayloadMap, IStepConfig, IFlow} from '../lib/interfaces';
 
@@ -16,7 +17,7 @@ export class RunnerState extends RunnerRecord {
   stepID: string | null;
 
   setStepPayload(stepID: string, actionID: string, payloads: any) {
-    this.setIn(['stepPayloads', stepID, actionID], payloads);
+    return this.setIn(['stepPayloads', stepID, actionID], payloads);
   }
 
   getStepPayloadMap(): IStepPayloadMap {
@@ -106,5 +107,5 @@ export const actions = {
       actionID,
       payload,
     };
-  }
+  },
 };

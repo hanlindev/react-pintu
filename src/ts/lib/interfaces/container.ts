@@ -9,7 +9,11 @@ export interface IInputsDeclaration extends IPayloadDeclaration {}
 export interface IAction {
   id: string;
   label: string;
-  type: 'intermediate' | 'endOfStep';
+  /**
+   * endOfStep and replaceStep are the same except how URL is updated.
+   * endOfStep pushes a new URL and replaceStep replaces the URL.
+   */
+  type: 'intermediate' | 'endOfStep' | 'replaceStep';
   payload: IPayloadDeclaration;
 }
 

@@ -132,6 +132,30 @@ export class PrimitiveTypeChecker implements ITypeChecker {
     );
   }
 
+  serialize(value: any): string {
+    if (!this.isSerializable()) {
+      return '';
+    }
+
+    return _.toString(value);
+  }
+
+  deserialize(valueString: string): any {
+    if (!this.isSerializable()) {
+      return undefined;
+    }
+
+    switch (this.type) {
+      case 'number':
+        return _.toNumber(valueString);
+      case 'boolean':
+        return valueString === 'true';
+      case 'string':
+      default:
+        return valueString;
+    }
+  }
+
   static getFactory(type: PrimitiveType) {
     return makeFactory(
       new PrimitiveTypeChecker(type, false),

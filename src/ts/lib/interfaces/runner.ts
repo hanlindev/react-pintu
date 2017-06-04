@@ -25,4 +25,5 @@ export interface IURLParams {
 
 export interface IRunnerEventHandlers {
   onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<IFlow>;
+  onGetStepID(location: IURLLocation, params: IURLParams): Promise<string>;
 }

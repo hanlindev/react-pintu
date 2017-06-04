@@ -13,16 +13,14 @@ export class ActionPayloadMultiplexer extends LogicContainer<void> {
     return {
       name: 'ActionPayloadMultiplexer',
       inputs: {
-        actionPayloadDeclaration: Types.object,
+        actionPayload: Types.object,
       },
       actions: {
         next: {
           id: 'next',
           label: 'Next',
-          type: 'endOfStep',
-          payload: {
-            actionPayload: Types.object.isRequired,
-          },
+          type: 'replaceStep',
+          payload: {},
         },
       },
       pathTemplate: '/multiplex_action_payload',
@@ -31,7 +29,7 @@ export class ActionPayloadMultiplexer extends LogicContainer<void> {
 
   run(input: any, onAction: IActionCallback): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      onAction('next', input);
+      onAction('next', input.actionPayload);
     });
   }
 }

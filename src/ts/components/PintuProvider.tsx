@@ -39,6 +39,12 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
     appWrapper: (props: any) => <div>props.children</div>,
     canUseBuilder: false,
     builderUrlPrefix: '/builder',
+    /**
+     * Three possible parameters:
+     * 1. :flowID
+     * 2. :stepID,
+     * 3. :containerPathTemplate
+     */
     runnerUrlTemplate: '/:flowID/:stepID:containerPathTemplate',
     theme: {},
   };
@@ -81,7 +87,12 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
           <Route 
             key={name}
             path={path} 
-            component={createRunner(spec, containerRegistry, runnerEventHandlers)}
+            component={createRunner(
+              spec, 
+              containerRegistry, 
+              runnerUrlTemplate as string,
+              runnerEventHandlers,
+            )}
           />
         );
       }

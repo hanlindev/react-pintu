@@ -5,27 +5,61 @@ import {IContainerSpec, IActionCallback} from '../../lib/interfaces';
 import {UIContainer} from '../../lib/UIContainer';
 import * as Types from '../../lib/types';
 
+interface IInputs {
+  testString: string;
+  testArray?: Array<any>;
+  testObject?: Object;
+  testNumber?: number;
+  testBool?: boolean;
+}
+
 interface IProps {
-  inputs: any;
+  inputs: IInputs;
   onAction: IActionCallback;
 }
 
 class SampleViewComponent extends React.Component<IProps, void> {
+  onTestAction(button: string) {
+    const {onAction} = this.props;
+    onAction('testAction', {
+      strArg: `${button} was clicked`,
+      numArg: 0,
+    });
+  }
+
   render() {
+    const {
+      inputs: {
+        testString,
+      },
+    } = this.props;
+
     const style: React.CSSProperties = {
       marginLeft: 8,
     };
 
     return (
       <div>
-        TODO
-        <Button style={style} use="confirm">
+        {testString}
+        <Button 
+          style={style} 
+          use="confirm"
+          onClick={() => this.onTestAction('confirm')}
+        >
           Confirm
         </Button>
-        <Button style={style} use="default">
+        <Button 
+          style={style} 
+          use="default"
+          onClick={() => this.onTestAction('default')}
+        >
           Default
         </Button>
-        <Button style={style} use="danger">
+        <Button 
+          style={style} 
+          use="danger"
+          onClick={() => this.onTestAction('danger')}
+        >
           Danger
         </Button>
       </div>
@@ -40,7 +74,7 @@ export class SampleView extends UIContainer {
       pathTemplate: '/sample',
       inputs: {
         testString: Types.string.isRequired,
-        testArray: Types.array.isRequired,
+        testArray: Types.array,
         typeObject: Types.object,
         testNumber: Types.number,
         testBool: Types.bool,

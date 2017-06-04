@@ -215,7 +215,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
         <div 
           style={{
             boxSizing: 'border-box',
-            height: '100vh', 
+            height: '100%', 
             paddingTop: 400,
             textAlign: 'center',
             width: '100vw',

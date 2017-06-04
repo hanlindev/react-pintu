@@ -11,10 +11,12 @@ export interface Requireable extends TypeCheckerFactory {
 export interface ITypeChecker {
   satisfy(other: ITypeChecker): boolean;
   isRequired(): boolean;
-  toPropType(): ReactPropType;
+  toPropType?(): ReactPropType;
   toString(): string;
   isSerializable(): boolean;
   toJSON(): string;
   validate(value: any): boolean;
   getName(): string;
+  serialize(value: any): string;
+  deserialize(strValue: string): any;
 }

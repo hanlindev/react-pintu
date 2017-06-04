@@ -1,6 +1,6 @@
 import {AbstractInstanceFactory, PortModel} from 'storm-react-diagrams';
 import {TypeCheckerFactory} from '../../../lib/interfaces';
-import {deSerializeTypeDeclaration} from '../../../lib/types';
+import {deSerializeTypeDeclaration, SerializableTypeClasses} from '../../../lib/types';
 import {BasePortModel} from './BasePortModel';
 
 export class InputPortModel extends BasePortModel {
@@ -43,7 +43,8 @@ export class InputPortModel extends BasePortModel {
 
   deSerialize(data: any) {
     super.deSerialize(data);
-    const deSerializedType = deSerializeTypeDeclaration(data.typeImpl);
+    const deSerializedType = 
+      deSerializeTypeDeclaration(data.typeImpl, SerializableTypeClasses);
     if (!deSerializedType) {
       throw new TypeError(
         `Unrecognized type object for ${data.inputName}`,

@@ -71,7 +71,18 @@ function onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
 
 function onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<IFlow> {
   return new Promise<IFlow>((resolve) => {
+    const savedString = localStorage.getItem('localFlow');
+    if (savedString) {
+      resolve(JSON.parse(savedString));
+      return;
+    }
     resolve(DefaultFlow);
+  });
+}
+
+function onGetStepID(location: IURLLocation, params: IURLParams): Promise<string> {
+  return new Promise<string>((resolve) => {
+    resolve(params.stepID);
   });
 }
 
@@ -81,4 +92,5 @@ export {
   onAutoSaveFlow,
   onUserSaveFlow,
   onRunnerLoadFlow,
+  onGetStepID,
 }
