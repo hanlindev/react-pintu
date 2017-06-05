@@ -11,8 +11,9 @@ import {UIContainer} from '../../lib/UIContainer';
 import {ActionPayloadMultiplexer} from '../../lib/containers';
 import {IContainerSpec, IActionDestination, IFlow, IStepPayloadMap, IStepConfig, IURLLocation, IURLParams, IRunnerEventHandlers, IAction} from '../../lib/interfaces';
 import {IState} from '../../reducers';
-import {actions, RunnerActionType} from '../../reducers/runner';
-import {InputLoader} from './InputLoader';
+import {RunnerActionType} from '../../reducers/runner';
+import {actions} from '../../reducers/runner/actions';
+import {InputLoader} from '../../lib/InputLoader';
 import {IPintuRunnerProps} from './props';
 import {LogicRunner} from './LogicRunner';
 import {UIRunner} from './UIRunner';
@@ -85,79 +86,22 @@ export function createRunner(
 
     private onAction(name: string, payload: any) {
       const {
+        dispatch,
         stepConfig,
       } = this.props;
       const actionSpec = container.actions[name];
 
       if (actionSpec && stepConfig) {
-        this.carryoutAction(actionSpec, stepConfig, payload);
+        dispatch(actions.performAction(
+          stepConfig, 
+          actionSpec, 
+          payload,
+          registry,
+          runnerUrlTemplate,
+        ));
       } else {
         // TODO better error handling
         console.error('Unknown action - ' + name);
-      }
-    }
-
-    private carryoutAction(
-      actionSpec: IAction, 
-      stepConfig: IStepConfig,
-      payload: any,
-    ) {
-      const {
-        dispatch,
-      } = this.props;
-      const {
-        destinations,
-      } = stepConfig;
-
-      const payloadShape = shape(actionSpec.payload)();
-      if (payloadShape.validate(payload)) {
-        dispatch(actions.setStepPayload(
-          stepConfig.id,
-          actionSpec.id,
-          payload
-        ));
-
-        const destination = destinations[actionSpec.id];
-        if (
-          (actionSpec.type === 'endOfStep' || actionSpec.type === 'replaceStep')
-          && destination && destination.type === 'step'
-        ) {
-          this.goToStep(destination, payload, actionSpec.type);
-        }
-      } else {
-        // TODO better error handling
-        console.error('Payload has invalid shape');
-      }
-    }
-
-    private goToStep(
-      destination: IActionDestination, 
-      payload: any, 
-      actionType: string,
-    ) {
-      const {
-        dispatch,
-        flow,
-      } = this.props;
-      const {
-        stepID,
-      } = destination;
-      const nextStepConfig = flow.steps[stepID];
-      const {pathTemplate} = 
-        registry.getContainerSpec(nextStepConfig.containerName);
-      const stringParams = getStringParams(pathTemplate);
-      const requiredInput = getRequiredProps(container.inputs);
-      const paramValues = _.pick(payload, stringParams);
-      const containerPath = fillString(pathTemplate, paramValues);
-      const finalPath = fillString(runnerUrlTemplate, {
-        containerPathTemplate: containerPath,
-        stepID,
-      });
-
-      if (actionType === 'endOfStep') {
-        history.push(finalPath);
-      } else {
-        history.replace(finalPath);
       }
     }
 

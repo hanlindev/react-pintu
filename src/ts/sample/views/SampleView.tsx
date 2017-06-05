@@ -22,7 +22,7 @@ class SampleViewComponent extends React.Component<IProps, void> {
   onTestAction(button: string) {
     const {onAction} = this.props;
     onAction('testAction', {
-      strArg: `${button} was clicked`,
+      strArg: button,
       numArg: 0,
     });
   }
@@ -40,7 +40,7 @@ class SampleViewComponent extends React.Component<IProps, void> {
 
     return (
       <div>
-        {testString}
+        {testString} was clicked
         <Button 
           style={style} 
           use="confirm"
@@ -71,7 +71,7 @@ export class SampleView extends UIContainer {
   getContainerSpec(): IContainerSpec {
     return {
       name: 'SampleView',
-      pathTemplate: '/sample',
+      pathTemplate: '/sample/:testString',
       inputs: {
         testString: Types.string.isRequired,
         testArray: Types.array,

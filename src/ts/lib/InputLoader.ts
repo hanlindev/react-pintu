@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
-import {IInputsDeclaration, IContainerSpec, IStepPayloadMap, IStepConfig, IURLLocation, IURLParams, IInputSourceMap} from '../../lib/interfaces';
-import {getRequiredProps, shape} from '../../lib/types';
+import {IInputsDeclaration, IContainerSpec, IStepPayloadMap, IStepConfig, IURLLocation, IURLParams, IInputSourceMap} from './interfaces';
+import {getRequiredProps, shape} from './types';
 
 export class InputLoader {
   private _inputs: any;
@@ -24,8 +24,10 @@ export class InputLoader {
   public prepareActionPayloadMultiplexerInputs(
     stepConfig: IStepConfig,
   ) {
-    this._inputs = {};
-    this.generateActionPayloadMultiplexerInputs(stepConfig);
+    this._inputs = InputLoader.generateActionPayloadMultiplexerInputs(
+      stepConfig,
+      this.stepPayloads,
+    );
   }
 
   /**
@@ -40,28 +42,35 @@ export class InputLoader {
    * 2. If not found in query or param, keep the field unset in the _inputs map.
    */
   private generateCommonInputs() {
-    this.generateInputFromSourceSpecs(); // a
+    this._inputs = InputLoader.generateInputFromSourceSpecs(
+      this.inputSources, 
+      this.stepPayloads,
+    ); // a
     this.generateDefaultValuesForRequiredInputs(); // b
   }
 
-  private generateInputFromSourceSpecs() {
-    const result = {};
-    _.forEach(this.inputSources, (source, name: string) => {
+  static generateInputFromSourceSpecs(
+    inputSources: IInputSourceMap,
+    stepPayloads: IStepPayloadMap,
+  ) {
+    const result: any = {};
+    _.forEach(inputSources, (source, name: string) => {
       switch (source.type) {
         case 'actionPayload':
           const value = _.get(
-            this.stepPayloads, 
+            stepPayloads, 
             [source.stepID, source.actionID, source.outputName],
           );
           if (value !== undefined) {
-            this._inputs[name] = value;
+            result[name] = value;
           }
           break;
         case 'constant':
-          this._inputs[name] = source.value;
+          result[name] = source.value;
           break;
       }
     });
+    return result;
   }
 
   private generateDefaultValuesForRequiredInputs() {
@@ -86,15 +95,18 @@ export class InputLoader {
    * 2. Get the saved payload of that action.
    * 3. Set the payload as the actionPayload field in the input.
    */
-  private generateActionPayloadMultiplexerInputs(
-    stepConfig: IStepConfig
+  static generateActionPayloadMultiplexerInputs(
+    stepConfig: IStepConfig,
+    stepPayloadMap: IStepPayloadMap,
   ) {
     const {
       stepID,
       actionID,
     } = stepConfig.sources[0];
-    const stepPayloads = _.get(this.stepPayloads, [stepID, actionID]);
-    this._inputs.actionPayload = stepPayloads;
+    const stepPayloads = _.get(stepPayloadMap, [stepID, actionID]);
+    return {
+      actionPayload: stepPayloads,
+    }
   }
 
   public isValid() {
