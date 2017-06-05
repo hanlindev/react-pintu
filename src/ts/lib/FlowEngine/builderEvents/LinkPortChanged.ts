@@ -146,6 +146,7 @@ export class LinkTargetPortChanged extends LinkPortChanged {
 
   acceptForInput(engine: IFlowEngine): IStepConfigMapChange {
     const targetNode = engine.getNodeRef(this._port);
+    engine.clearLinks(this._port, [this.link.getID()]);
     const {argName} = this.getPort<InputPortModel>();
     const sourcePort = this.link.getSourcePort() as OutputPortModel;
 

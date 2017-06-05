@@ -116,7 +116,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
 
   private renderOutputDestinationButton(output: OutputPortModel) {
     const {flowEngine} = this.props;
-    const link = flowEngine.getOnlyLink(output);
+    const link = flowEngine.getFirstLink(output);
     if (link) {
       const targetPort = link.getTargetPort() as InputPortModel;
       const targetNode = flowEngine.getNodeRef(targetPort);

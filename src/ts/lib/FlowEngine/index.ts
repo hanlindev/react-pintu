@@ -201,4 +201,24 @@ export class FlowEngine implements IFlowEngine {
     }
     return (linkKeys.length === 0) ? null : port.getLinks()[linkKeys[0]];
   }
+
+  getFirstLink(port: PortModel): LinkModel | null {
+    const links = port.getLinks();
+    if (_.isEmpty(links)) {
+      return null;
+    }
+
+    return links[Object.keys(links)[0]];
+  }
+
+  clearLinks(port: PortModel, exceptIds: Array<string> = []) {
+    const links = port.getLinks();
+    _.forEach(links, (link, id: string) => {
+      if (exceptIds.indexOf(id) < 0) {
+        port.removeLink(link);
+        this.diagramModel.removeLink(link);
+        link.remove();
+      }
+    });
+  }
 }

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {LinkModel} from 'storm-react-diagrams';
+import {LinkModel, PortModel} from 'storm-react-diagrams';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
 import {IStepConfig} from '../../interfaces/flow';
 import {NodeModel} from '../../../components/ui/diagrams/NodeModel';
@@ -56,10 +56,19 @@ export class LinkAdded implements IDiagramChange {
     if (src) {
       const srcLinks = src.getLinks();
       _.forEach(srcLinks, (link, linkID: string) => {
-        linkID !== this.link.getID() && this.removeLink(engine, link);
+        if (this.shouldRemoveLink(src, link)) {
+          this.removeLink(engine, link);
+        }
       });
     }
     return result;
+  }
+
+  shouldRemoveLink(src: PortModel,  link: LinkModel) {
+    return (
+      !(src instanceof OutputPortModel)
+      && link.getID() !== this.link.getID()
+    );
   }
 
   reject(engine: IFlowEngine) {

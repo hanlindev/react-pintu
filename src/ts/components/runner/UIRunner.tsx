@@ -4,7 +4,7 @@ import {IContainerSpec, IActionCallback} from '../../lib/interfaces';
 import {UIContainer} from '../../lib/UIContainer';
 
 interface IUIRunnerProps extends IPintuRunnerProps {
-  ui: UIContainer;
+  ui: UIContainer<any>;
 }
 
 export class UIRunner extends React.Component<IUIRunnerProps, void> {

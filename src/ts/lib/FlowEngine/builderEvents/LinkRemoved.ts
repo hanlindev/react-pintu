@@ -1,7 +1,7 @@
-import {LinkModel} from 'storm-react-diagrams';
+import {LinkModel, PortModel} from 'storm-react-diagrams';
 import {IStepConfigMap} from '../../interfaces/flow';
 import {IDiagramChange, IFlowEngine} from '../interfaces';
-import {ActionPortModel, EntrancePortModel, InputPortModel} from '../../../components/ui/diagrams';
+import {ActionPortModel, EntrancePortModel, InputPortModel, NodeModel, OutputPortModel} from '../../../components/ui/diagrams';
 /**
  * Accept:
  * The source node's action's destination wll be deleted.
@@ -32,11 +32,43 @@ export class LinkRemoved implements IDiagramChange {
     const targetPort = this.link.getTargetPort();
     if (targetPort instanceof InputPortModel && engine.hasNode(targetPort)) {
       const node = engine.getNodeRef(targetPort);
-      delete node.config.inputSources[targetPort.argName];
+      if (this.shouldDeleteInputSource(
+        engine,
+        node,
+        sourcePort,
+        targetPort,
+      )) {
+        delete node.config.inputSources[targetPort.argName];
+      }
       result[node.config.id] = node.config;
     }
 
     return result;
+  }
+
+  shouldDeleteInputSource(
+    engine: IFlowEngine,
+    targetNode: NodeModel, 
+    output: PortModel | null, 
+    input: InputPortModel,
+  ): boolean {
+    if (!(output instanceof OutputPortModel)) {
+      return false;
+    }
+    const srcNode = engine.getNodeRef(output);
+    if (!srcNode) {
+      return false;
+    }
+
+    const existingSource = targetNode.config.inputSources[input.argName];
+    if (existingSource) {
+      return (
+        existingSource.type === 'actionPayload' 
+        && existingSource.stepID === srcNode.config.id
+      );
+    }
+
+    return false;
   }
 
   reject(engine: IFlowEngine) {

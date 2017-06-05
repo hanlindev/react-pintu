@@ -1,4 +1,4 @@
-import {DiagramEngine, DiagramModel, PortModel} from 'storm-react-diagrams';
+import {DiagramEngine, DiagramModel, PortModel, LinkModel} from 'storm-react-diagrams';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
 import {IStepConfigMapChange} from '../interfaces/flow';
 import {WireablePortType} from '../../components/ui/diagrams';
@@ -15,6 +15,7 @@ export interface IFlowEngine {
   getDiagramEngine(): DiagramEngine;
   getDiagramModel(): DiagramModel;
   getContainer(name: string): BaseContainer;
+  clearLinks(port: PortModel, exceptIds: Array<string>): void;
 }
 
 export interface IDiagramChange {

@@ -2,9 +2,9 @@ import * as React from 'react';
 import {IInputsDeclaration, IActionsDeclaration, IActionCallback} from './interfaces';
 import {BaseContainer} from './BaseContainer';
 
-export abstract class UIContainer extends BaseContainer {
+export abstract class UIContainer<TInput> extends BaseContainer {
   abstract render(
-    inputs: IInputsDeclaration, 
+    inputs: TInput, 
     onAction: IActionCallback,
   ): JSX.Element;
 

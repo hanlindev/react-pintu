@@ -67,7 +67,7 @@ class SampleViewComponent extends React.Component<IProps, void> {
   }
 }
 
-export class SampleView extends UIContainer {
+export class SampleView extends UIContainer<IInputs> {
   getContainerSpec(): IContainerSpec {
     return {
       name: 'SampleView',
@@ -93,7 +93,7 @@ export class SampleView extends UIContainer {
     };
   }
 
-  render(inputs: any, onAction: IActionCallback) {
+  render(inputs: IInputs, onAction: IActionCallback) {
     return (
       <SampleViewComponent inputs={inputs} onAction={onAction} />
     );

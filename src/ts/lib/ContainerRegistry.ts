@@ -6,7 +6,7 @@ import {safe} from './utils';
 import {LogicContainer} from './LogicContainer';
 import {UIContainer} from './UIContainer';
 
-type ComponentClass = LogicContainer<any> | UIContainer;
+type ComponentClass = LogicContainer<any> | UIContainer<any>;
 
 export class ContainerRegistry {
   private containers: {[key: string]: IContainerSpec} = {};
