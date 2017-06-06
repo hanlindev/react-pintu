@@ -29,31 +29,57 @@ const DefaultFlow: IFlow = {
   serializedDiagram: null,
 }
 
+interface ISavedFlows {
+  nextId: number,
+  flows: {[id: string]: IFlow},
+}
+
+function getSavedFlows(): ISavedFlows {
+  const savedFlowString = localStorage.getItem('savedFlows');
+  let savedFlows = {
+    nextId: 0,
+    flows: {},
+  };
+  if (savedFlowString) {
+    savedFlows = JSON.parse(savedFlowString);
+  }
+  return savedFlows;
+}
+
 function onCreateFlow(data: IFlowMetaData): Promise<string> {
   return new Promise<string>((resolve) => {
-    resolve(_.uniqueId('dummy-flow-'));
+    const savedFlows = getSavedFlows();
+    const newFlows: ISavedFlows = {
+      nextId: savedFlows.nextId + 1,
+      flows: {
+        ...savedFlows.flows,
+        [savedFlows.nextId]: {
+          id: savedFlows.nextId.toString(),
+          metaData: data,
+          firstStepID: '0',
+          steps: {},
+          serializedDiagram: null,
+        },
+      },
+    };
+
+    localStorage.setItem('savedFlows', JSON.stringify(newFlows));
+    resolve(savedFlows.nextId.toString());
   });
 }
 
 function onLoadFlow(flowID: string): Promise<IFlow> {
   return new Promise<IFlow>((resolve) => {
-    const queryStringIndex = location.href.indexOf('?');
-
-    const params = qs.parse(location.href.slice(queryStringIndex + 1));
-    if (queryStringIndex < 0 || params.new) {
-      const savedString = localStorage.getItem('localFlow');
-      if (savedString) {
-        resolve(JSON.parse(savedString));
-        return;
-      }
-    }
-    resolve(DefaultFlow);
+    const savedFlows = getSavedFlows();
+    resolve(savedFlows.flows[flowID]);
   });
 }
 
 function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {  
   return new Promise<FlowSaveResultType>((resolve) => {
-    localStorage.setItem('localFlow', JSON.stringify(newFlow));
+    const savedFlows = getSavedFlows();
+    savedFlows.flows[newFlow.id] = newFlow;
+    localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
     resolve({
       type: 'success',
     });
@@ -62,7 +88,9 @@ function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
 
 function onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
   return new Promise<FlowSaveResultType>((resolve) => {
-    localStorage.setItem('localFlow', JSON.stringify(newFlow));
+    const savedFlows = getSavedFlows();
+    savedFlows.flows[newFlow.id] = newFlow;
+    localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
     resolve({
       type: 'success',
     });
@@ -71,12 +99,9 @@ function onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
 
 function onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<IFlow> {
   return new Promise<IFlow>((resolve) => {
-    const savedString = localStorage.getItem('localFlow');
-    if (savedString) {
-      resolve(JSON.parse(savedString));
-      return;
-    }
-    resolve(DefaultFlow);
+    const savedFlows = getSavedFlows();
+    const latestFlow = savedFlows.flows[savedFlows.nextId - 1];
+    resolve(latestFlow);
   });
 }
 

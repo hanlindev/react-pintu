@@ -14,10 +14,13 @@ import {BuilderActionType} from '../../reducers/builder/common';
 
 import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
 import {NodeDetailCards} from './NodeDetailCards';
+import {NewFlowForm} from './NewFlowForm';
 import {ContextPopover} from '../ui/ContextPopover';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ContainerSelector} from '../ui/ContainerSelector';
+import {history} from '../../lib/History';
 import {safe} from '../../lib/utils';
+import {style} from '../../lib/styles';
 
 import 'storm-react-diagrams/src/sass.scss';
 import '../../../scss/builder/main.scss';
@@ -33,6 +36,7 @@ interface IFlowCanvas {
 }
 
 export interface IPintuBuilderProps {
+  builderUrlPrefix: string;
   dispatch: Dispatch<BuilderActionType>;
   flowCanvas?: IFlowCanvas;
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
@@ -128,7 +132,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     }
   }
 
-  _getRootStyle(): React.CSSProperties {
+  private getRootStyle(): React.CSSProperties {
     return {
       display: 'flex',
       flexFlow: 'row',
@@ -139,7 +143,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     };
   }
 
-  _getCanvasStyle(): React.CSSProperties {
+  private getCanvasStyle(): React.CSSProperties {
     return {
       backgroundColor: 'rgb(60, 60, 60)',
       boxShadow: 'rgba(0, 0, 0, 0.7) 0px 0px 4px, rgba(0, 0, 0, 0.4) -4px 0px 8px',
@@ -149,7 +153,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     };
   }
 
-  _getConfigurationTrayStyle(): React.CSSProperties {
+  private getConfigurationTrayStyle(): React.CSSProperties {
     return {
       boxSizing: 'border-box',
       flex: '0 0 auto',
@@ -162,7 +166,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     }
   }
 
-  _onRightClickCanvas(e: React.MouseEvent<any>) {
+  private onRightClickCanvas(e: React.MouseEvent<any>) {
     if (!e.shiftKey) {
       e.preventDefault();
       const {screenX, screenY} = e;
@@ -177,13 +181,13 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.setState({newNodeMenuPosition: undefined});
   }
 
-  _onMouseDownCanvas(e: React.MouseEvent<any>) {
+  private onMouseDownCanvas(e: React.MouseEvent<any>) {
     this.setState({
       isMovingCanvas: true,
     });
   }
 
-  _onMouseUpCanvas(e: React.MouseEvent<any>) {
+  private onMouseUpCanvas(e: React.MouseEvent<any>) {
     this.setState({
       isMovingCanvas: false,
     });
@@ -203,6 +207,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     const {
       dispatch,
       flowCanvas,
+      params,
       registry,
       snackMessage,
       selectedNode,
@@ -210,6 +215,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     const {
       newNodeMenuPosition,
     } = this.state;
+
+    if (params.flowID === undefined) {
+      return this.renderCreateFlowForm();
+    }
+
     if (!flowCanvas) {
       return (
         <div 
@@ -232,14 +242,14 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     return (
       <div
         className={rootClass}
-        style={this._getRootStyle()}
+        style={this.getRootStyle()}
       >
         <div 
-          onContextMenu={(e) => this._onRightClickCanvas(e)}
+          onContextMenu={(e) => this.onRightClickCanvas(e)}
           onClick={() => this.dismissNewNodeMenu()}
-          onMouseDown={(e) => this._onMouseDownCanvas(e)}
-          onMouseUp={(e) => this._onMouseUpCanvas(e)}
-          style={this._getCanvasStyle()}
+          onMouseDown={(e) => this.onMouseDownCanvas(e)}
+          onMouseUp={(e) => this.onMouseUpCanvas(e)}
+          style={this.getCanvasStyle()}
         >
           <ContextPopover
               show={true}
@@ -257,7 +267,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
             diagramEngine={flowCanvas.diagramEngine} 
           />
         </div>
-        <div style={this._getConfigurationTrayStyle()}>
+        <div style={this.getConfigurationTrayStyle()}>
           <NodeDetailCards 
             flowEngine={flowCanvas.flowEngine}
             node={selectedNode} 
@@ -272,11 +282,49 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       </div>
     );
   }
+
+  private renderCreateFlowForm() {
+    return (
+      <div
+        style={this.getRootStyle()}
+      >
+        <div 
+          className={cx('storm-diagrams-canvas')}
+          style={{
+            ...this.getCanvasStyle(),
+            ...style('blur-2'),
+            height: '100%',
+            width: '100%',
+            position: 'absolute',
+          }}
+        />
+
+        <NewFlowForm
+          style={{
+            borderRadius: '2px',
+            backgroundColor: 'white',
+            filter: 'none',
+            margin: 'auto',
+            position: 'relative',
+            top: -50,
+            width: 500,
+            zIndex: 10,
+          }}
+          onCreateFlow={async (newFlow: IFlowMetaData) => {
+            const newFlowId = await this.props.onCreateFlow(newFlow);
+            const newUrl = `${this.props.builderUrlPrefix}/${newFlowId}`;
+            history.replace(newUrl);
+          }}
+        />
+      </div>
+    );
+  }
 }
 
 export function createBuilder(
   eventHandlers: IBuilderEventHandlers,
   registry: ContainerRegistry,
+  builderUrlPrefix: string,
 ) {
   FlowEngine.setRegistry(registry);
   return connect((state: IState) => {
@@ -299,6 +347,7 @@ export function createBuilder(
       registry,
       snackMessage: state.builder.snackMessage,
       selectedNode: state.builder.selectedNode,
+      builderUrlPrefix,
     };
   })(PintuBuilder);
 }

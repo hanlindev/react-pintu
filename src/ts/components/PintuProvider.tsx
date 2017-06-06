@@ -61,8 +61,16 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
   }
 
   private getBuilderComponent() {
-    const {containerRegistry} = this.props;
-    return createBuilder(this.props.builderEventHandlers, containerRegistry);
+    const {
+      containerRegistry, 
+      builderEventHandlers, 
+      builderUrlPrefix,
+    } = this.props;
+    return createBuilder(
+      builderEventHandlers, 
+      containerRegistry,
+      builderUrlPrefix as string,
+    );
   }
 
   render() {

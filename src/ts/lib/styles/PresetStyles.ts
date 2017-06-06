@@ -5,6 +5,10 @@ interface ICSSPropertiesGetter {
   (...args: Array<any>): CSSProperties;
 }
 const PresetStyles: {[key: string]: CSSProperties | ICSSPropertiesGetter} = {
+  'blur-2': {
+    filter: 'blur(2px)',
+  },
+  
   ellipsis: {
     display: 'block',
     overflow: 'hidden',
