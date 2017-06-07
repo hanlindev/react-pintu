@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import {Dispatch} from 'react-redux';
 import {FlowEngine} from '../../lib/FlowEngine';
-import {IFlow, IStepConfig, IStepConfigMapChange} from '../../lib/interfaces';
+import {IFlow, IStepConfig, IStepConfigMapChange, IFlowMetaDataMap} from '../../lib/interfaces';
 import {DiagramListener, IDiagramEvents} from '../../lib/FlowEngine/listeners/DiagramListener';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
@@ -25,6 +25,13 @@ export const actions = {
     return {
       type: common.SET_FLOW,
       newFlow,
+    };
+  },
+
+  setFlowList(flowList: IFlowMetaDataMap): BuilderActionType {
+    return {
+      type: common.SET_FLOW_LIST,
+      flowList,
     };
   },
 
@@ -111,7 +118,6 @@ export const actions = {
               flow.steps[id] = value;
             }
           });
-          console.log(flow.steps);//fd
         } else {
           dispatch(actions.setSnackMessage(linkChange.getInvalidReason()));
           linkChange.reject(flowEngine);

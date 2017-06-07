@@ -71,7 +71,7 @@ export class SampleView extends UIContainer<IInputs> {
   getContainerSpec(): IContainerSpec {
     return {
       name: 'SampleView',
-      pathTemplate: '/sample/:testString',
+      pathTemplate: '/sample(/:testString)',
       inputs: {
         testString: Types.string.isRequired,
         testArray: Types.array,

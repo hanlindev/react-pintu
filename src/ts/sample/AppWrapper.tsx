@@ -1,6 +1,7 @@
 import * as React from 'react';
+import {Link} from 'react-router';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import {ITheme, IThemeContext, makeThemeable} from '../components/ui/ThemeableComponent';
+import {ITheme, IThemeContext, makeThemeable, ThemeableComponent} from '../components/ui/ThemeableComponent';
 
 import {Icon} from './ui';
 
@@ -37,40 +38,60 @@ function getContentStyle(): React.CSSProperties {
   };
 }
 
-function _AppWrapper(props: any, context: IThemeContext) {
-  const {theme} = context;
-  return (
-    <MuiThemeProvider>
-      <div style={getRootStyle()}>
-        <div style={getNavbarStyle(theme)}>
-          <div
-            style={{
-              alignItems: 'center',
-              display: 'flex',
-              flex: '0 0 auto',
-              userSelect: 'none',
-            }}
-          >
-            <Icon style={{marginRight: 8}}>view_compact</Icon>
-            Pintu Demo
-          </div>
-          <div
-            style={{flex: 1}}
-          />
-          <div
-            style={{
-              flex: '0 0 auto',
-            }}
-          >
-          </div>
-        </div>
-
-        <div style={getContentStyle()}>
-          {props.children}
-        </div>
-      </div>
-    </MuiThemeProvider>
-  );
+function getNavLinkStyle(): React.CSSProperties {
+  return {
+    color: 'white',
+    marginLeft: 8,
+    textDecoration: 'none',
+  };
 }
 
-export const AppWrapper = makeThemeable(_AppWrapper);
+export class AppWrapper extends ThemeableComponent<any, void> {
+  render() {
+    const {theme} = this.context;
+    return (
+      <MuiThemeProvider>
+        <div style={getRootStyle()}>
+          <div style={getNavbarStyle(theme)}>
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flex: '0 0 auto',
+                userSelect: 'none',
+              }}
+            >
+              <Icon style={{marginRight: 8}}>view_compact</Icon>
+              Pintu Demo
+              <Link 
+                style={getNavLinkStyle()}
+                to="/builder"
+              >
+                Builder
+              </Link>
+              <Link
+                style={getNavLinkStyle()}
+                to="/"
+              >
+                Test
+              </Link>
+            </div>
+            <div
+              style={{flex: 1}}
+            />
+            <div
+              style={{
+                flex: '0 0 auto',
+              }}
+            >
+            </div>
+          </div>
+
+          <div style={getContentStyle()}>
+            {this.props.children}
+          </div>
+        </div>
+      </MuiThemeProvider>
+    );
+  }
+}

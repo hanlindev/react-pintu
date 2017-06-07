@@ -12,9 +12,9 @@ import {IState} from '../../reducers';
 import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
-import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData} from '../../lib';
+import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap} from '../../lib';
 import {NodeDetailCards} from './NodeDetailCards';
-import {NewFlowForm} from './NewFlowForm';
+import {FlowList} from './FlowList';
 import {ContextPopover} from '../ui/ContextPopover';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ContainerSelector} from '../ui/ContainerSelector';
@@ -39,8 +39,10 @@ export interface IPintuBuilderProps {
   builderUrlPrefix: string;
   dispatch: Dispatch<BuilderActionType>;
   flowCanvas?: IFlowCanvas;
+  flowList: IFlowMetaDataMap;
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
+  onLoadFlowList: () => Promise<IFlowMetaDataMap>;
   onAutoSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   onUserSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   params: IParams;
@@ -92,6 +94,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.props.dispatch(actions.syncNewFlow(flowData));
   }
 
+  private async loadFlowList() {
+    const flowList = await this.props.onLoadFlowList();
+    this.props.dispatch(actions.setFlowList(flowList));
+  }
+
   private async createFlow(flowData: IFlowMetaData) {
     const {dispatch, onCreateFlow} = this.props;
     const flowID = await onCreateFlow(flowData);
@@ -110,6 +117,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       params: {flowID},
       flowCanvas,
     } = this.props;
+    this.loadFlowList();
     if (flowID) {
       this.loadFlowData(flowID);
     }
@@ -284,6 +292,11 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
   }
 
   private renderCreateFlowForm() {
+    const {
+      flowList,
+      onCreateFlow,
+      builderUrlPrefix,
+    } = this.props;
     return (
       <div
         style={this.getRootStyle()}
@@ -299,7 +312,9 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           }}
         />
 
-        <NewFlowForm
+        <FlowList
+          builderUrlPrefix={builderUrlPrefix}
+          flowList={flowList}
           style={{
             borderRadius: '2px',
             backgroundColor: 'white',
@@ -344,6 +359,7 @@ export function createBuilder(
     return {
       ...eventHandlers,
       ...flowCanvas,
+      flowList: state.builder.flowList,
       registry,
       snackMessage: state.builder.snackMessage,
       selectedNode: state.builder.selectedNode,

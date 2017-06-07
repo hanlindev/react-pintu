@@ -1,8 +1,9 @@
-import {IFlow, IStepConfig} from '../../lib/interfaces';
+import {IFlow, IStepConfig, IFlowMetaDataMap} from '../../lib/interfaces';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
 
 export const CREATE_STEP = 'builder.createStep';
 export const SET_FLOW = 'builder.setFlow';
+export const SET_FLOW_LIST = 'builder.setFlowList';
 export const RESTORE_FLOW = 'builder.restoreFlow';
 export const SET_SERIALIZED_DIAGRAM = 'builder.setSerializedDiagram';
 export const UPDATE_STEP_CONFIGS = 'builder.updateStepConfigs';
@@ -24,6 +25,10 @@ export type BuilderActionType =
 | {
   type: 'builder.setSelectedNode',
   node: NodeModel | null,
+}
+| {
+  type: 'builder.setFlowList',
+  flowList: IFlowMetaDataMap,
 }
 | {
   type: 'builder.setFlow',

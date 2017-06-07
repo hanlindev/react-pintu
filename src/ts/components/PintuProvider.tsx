@@ -6,6 +6,7 @@ import {Provider} from 'react-redux'
 import {Router, Route} from 'react-router';
 
 import {createRunner} from './runner';
+import {HomePage} from './HomePage';
 import {createBuilder} from './builder/PintuBuilder';
 import {history, store} from '../lib/History';
 import {ContainerRegistry} from '../lib/ContainerRegistry';
@@ -17,11 +18,14 @@ import * as injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 export interface IPintuProviderProps {
-  appWrapper?: React.StatelessComponent<any>;
+  appWrapper?: React.ComponentClass<any> | React.StatelessComponent<any>;
   builderUrlPrefix?: string;
   builderEventHandlers: IBuilderEventHandlers;
   canUseBuilder?: boolean;
   containerRegistry: ContainerRegistry;
+  // This is the entry point to your website. This is the path to the step that
+  // should replace the '/' path. By default, it is '/'
+  homePath?: string;
   runnerEventHandlers: IRunnerEventHandlers;
   runnerUrlTemplate?: string;
   theme?: Pick<ITheme, any>;
@@ -39,6 +43,7 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
     appWrapper: (props: any) => <div>props.children</div>,
     canUseBuilder: false,
     builderUrlPrefix: '/builder',
+    homePath: '/',
     /**
      * Three possible parameters:
      * 1. :flowID
@@ -81,6 +86,8 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
       containerRegistry,
       runnerEventHandlers,
       runnerUrlTemplate,
+      homePath,
+      builderEventHandlers,
     } = this.props;
     const routes = _.map(
       containerRegistry.containerSpecs,
@@ -109,6 +116,16 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
       <Provider store={store}>
         <Router history={history}>
           <div>
+            <Route 
+              path="/"
+              component={() => {
+                return (
+                  <HomePage 
+                    homePath={homePath as string}
+                  />
+                );
+              }}
+            />
             <Route component={appWrapper}>
               {routes}
               {children}

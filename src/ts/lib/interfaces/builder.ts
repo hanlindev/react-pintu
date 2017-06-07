@@ -18,14 +18,26 @@ export type FlowSaveResultType =
   message?: string,
 }
 
+export interface IFlowMetaDataMap {
+  [flowID: string]: IFlowMetaData;
+}
+
+export interface IDefaultStepData {
+  flowID?: string;
+  stepID: string;
+  [name: string]: any;
+}
+
 export interface IBuilderEventHandlers {
   // Given flow meta data, return a promise that resolves to the ID of the new
   // flow.
-  onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
+  onCreateFlow(flowData: IFlowMetaData): Promise<string>;
   // Given a flow ID, return a promise that resolves to the complete flow data.
-  onLoadFlow: (flowID: string) => Promise<IFlow>;
+  onLoadFlow(flowID: string): Promise<IFlow>;
+  // Load a map of flowID -> flow meta data.
+  onLoadFlowList(): Promise<IFlowMetaDataMap>;
   // Notify the app to auto-save the new flow. 
-  onAutoSaveFlow: (newFlow: IFlow) => Promise<FlowSaveResultType>;
+  onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType>;
   // Notify the app of user-initiated flow save.
-  onUserSaveFlow: (newFlow: IFlow) => Promise<FlowSaveResultType>;
+  onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType>;
 }

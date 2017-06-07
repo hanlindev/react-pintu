@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as qs from 'qs';
 
-import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams} from '../.';
+import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData} from '../.';
 
 const DefaultFlow: IFlow = {
   id: '1',
@@ -75,6 +75,17 @@ function onLoadFlow(flowID: string): Promise<IFlow> {
   });
 }
 
+function onLoadFlowList(): Promise<IFlowMetaDataMap> {
+  return new Promise<IFlowMetaDataMap>((resolve) => {
+    const savedFlows = getSavedFlows();
+    const result: IFlowMetaDataMap = {};
+    _.forEach(savedFlows.flows, (flow) => {
+      result[flow.id] = flow.metaData;
+    });
+    resolve(result);
+  });
+}
+
 function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {  
   return new Promise<FlowSaveResultType>((resolve) => {
     const savedFlows = getSavedFlows();
@@ -114,6 +125,7 @@ function onGetStepID(location: IURLLocation, params: IURLParams): Promise<string
 export {
   onCreateFlow,
   onLoadFlow,
+  onLoadFlowList,
   onAutoSaveFlow,
   onUserSaveFlow,
   onRunnerLoadFlow,

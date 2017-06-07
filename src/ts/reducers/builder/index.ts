@@ -4,9 +4,9 @@ import {Dispatch} from 'react-redux';
 import * as Immutable from 'immutable';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
 import {FlowEngine} from '../../lib/FlowEngine';
-import {ILinkSource, IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData} from '../../lib/interfaces';
+import {ILinkSource, IFlow, IInputsDeclaration, IActionsDeclaration, IStepConfig, IFlowMetaData, IFlowMetaDataMap} from '../../lib/interfaces';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
-import {BuilderActionType, SET_FLOW, UPDATE_STEP_CONFIGS, SET_SERIALIZED_DIAGRAM, SET_SNACK_MESSAGE, SET_SELECTED_NODE} from './common';
+import {BuilderActionType, SET_FLOW, UPDATE_STEP_CONFIGS, SET_SERIALIZED_DIAGRAM, SET_SNACK_MESSAGE, SET_SELECTED_NODE, SET_FLOW_LIST} from './common';
 
 export function builder(state: BuilderState, action: BuilderActionType) {
   if (!state) {
@@ -16,6 +16,8 @@ export function builder(state: BuilderState, action: BuilderActionType) {
   switch (action.type) {
     case SET_FLOW:
       return state.setFlow(action.newFlow);
+    case SET_FLOW_LIST:
+      return state.setFlowList(action.flowList);
     case UPDATE_STEP_CONFIGS:
       return state.updateStepConfigs(action.stepConfigChanges);
     case SET_SNACK_MESSAGE:
@@ -31,12 +33,14 @@ export function builder(state: BuilderState, action: BuilderActionType) {
 
 const BuilderRecord = Immutable.Record({
   flow: null,
+  flowList: {},
   snackMessage: null,
   selectedNode: null,
 });
 
 export class BuilderState extends BuilderRecord {
   flow: IFlow | null;
+  flowList: IFlowMetaDataMap;
   snackMessage: string | null;
   selectedNode: NodeModel | null;
 
@@ -71,6 +75,10 @@ export class BuilderState extends BuilderRecord {
       ...this.getFlowClone(),
       serializedDiagram,
     });
+  }
+
+  setFlowList(flowList: IFlowMetaDataMap) {
+    return this.set('flowList', flowList);
   }
 
   setSelectedNode(node: NodeModel | null) {

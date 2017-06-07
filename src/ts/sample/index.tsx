@@ -22,6 +22,7 @@ class PintuSample extends React.Component<{}, void> {
           logicRegistry,
           builtInRegistry,
         )}
+        homePath="/0/sample"
         builderEventHandlers={SampleServerAPI}
         runnerEventHandlers={SampleServerAPI}
         runnerUrlTemplate="/:stepID:containerPathTemplate"
