@@ -40,6 +40,7 @@ export class AddNode extends BaseTrigger {
       destinations: {},
       sources: [],
       inputSources: {},
+      urlIdOverride: '',
     };
   }
 

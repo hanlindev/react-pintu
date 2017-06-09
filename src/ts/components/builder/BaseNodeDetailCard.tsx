@@ -79,6 +79,7 @@ export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps
             <PortLabel
               model={input}
               use="others"
+              parentNode={node}
             />
           </div>
           

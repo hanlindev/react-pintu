@@ -19,6 +19,7 @@ export class NodeWidget extends BaseNodeWidget {
           style={{
             marginTop: this.context.theme.spacing.small,
           }}
+          parentNode={node}
         />
       );
     });
@@ -26,6 +27,7 @@ export class NodeWidget extends BaseNodeWidget {
       <PortLabel
         key="entrance"
         model={node.getEntrancePortModel()} 
+        parentNode={node}
       />,
       ...content,
     ];
@@ -47,6 +49,7 @@ export class NodeWidget extends BaseNodeWidget {
           key={model.getID()} 
           model={model} 
           style={style}
+          parentNode={node}
         />
       );
     });

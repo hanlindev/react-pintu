@@ -16,6 +16,7 @@ export type FlowSaveResultType =
   // be displayed. Otherwise a subtle generic message will be shown.
   type: 'success',
   message?: string,
+  savedFlow: IFlow,
 }
 
 export interface IFlowMetaDataMap {
@@ -28,12 +29,18 @@ export interface IDefaultStepData {
   [name: string]: any;
 }
 
+export type EditFlowCallbackType = <TK extends keyof IFlow> (
+  flowID: string, 
+  newFields: Pick<IFlow, TK>,
+) => Promise<FlowSaveResultType>;
+
 export interface IBuilderEventHandlers {
   // Given flow meta data, return a promise that resolves to the ID of the new
   // flow.
   onCreateFlow(flowData: IFlowMetaData): Promise<string>;
   // Given a flow ID, return a promise that resolves to the complete flow data.
   onLoadFlow(flowID: string): Promise<IFlow>;
+  onEditFlow: EditFlowCallbackType;
   // Load a map of flowID -> flow meta data.
   onLoadFlowList(): Promise<IFlowMetaDataMap>;
   // Notify the app to auto-save the new flow. 

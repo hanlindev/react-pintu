@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import {NodeModel} from './NodeModel';
 import {PortWidget} from './PortWidget';
 import {InputPortModel} from './InputPortModel';
 import {ThemeableComponent} from '../ThemeableComponent';
@@ -7,6 +8,7 @@ import {UseType} from './common';
 import {style} from '../../../lib/styles'; 
 
 export interface IInputPortLabelProps {
+  parentNode: NodeModel;
   model: InputPortModel;
   style?: React.CSSProperties;
   use?: UseType;
@@ -31,7 +33,8 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
   }
 
   render() {
-    const {model, use, style, ...others} = this.props;
+    const {model, use, style, parentNode, ...others} = this.props;
+    const {registry} = this.context;
     const port = (
       <PortWidget 
         name={model.getName()} 
@@ -40,7 +43,11 @@ export class InputPortLabel extends ThemeableComponent<IInputPortLabelProps, voi
         use={use}
       />
     );
-    const label = model.getLabel();
+    let label = model.getLabel();
+    const inputSource = parentNode.config.inputSources[model.argName];
+    if (inputSource) {
+      label += ' \u2713'; // A checkmark
+    }
 
     return (
       <div 

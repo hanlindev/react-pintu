@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import * as qs from 'qs';
-import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData} from '../.';
+import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData, resolveUrlStepId} from '../.';
 
 const DefaultFlow: IFlow = {
   id: '1',
@@ -16,6 +16,7 @@ const DefaultFlow: IFlow = {
       sources: [],
       destinations: {},
       inputSources: {},
+      urlIdOverride: '',
     },
     1: {
       id: '1',
@@ -23,6 +24,7 @@ const DefaultFlow: IFlow = {
       sources: [],
       destinations: {},
       inputSources: {},
+      urlIdOverride: '',
     }
   },
   serializedDiagram: null,
@@ -85,6 +87,18 @@ function onLoadFlowList(): Promise<IFlowMetaDataMap> {
   });
 }
 
+async function onEditFlow<TK extends keyof IFlow>(
+  flowID: string, 
+  newFields: Pick<IFlow, keyof IFlow>,
+): Promise<FlowSaveResultType> {
+  const flow = await onLoadFlow(flowID);
+  const newFlow = {
+    ...flow,
+    ...newFields,
+  };
+  return await onAutoSaveFlow(newFlow);
+}
+
 function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {  
   return new Promise<FlowSaveResultType>((resolve) => {
     const savedFlows = getSavedFlows();
@@ -92,6 +106,7 @@ function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
     localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
     resolve({
       type: 'success',
+      savedFlow: newFlow,
     });
   });
 }
@@ -103,6 +118,7 @@ function onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {
     localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
     resolve({
       type: 'success',
+      savedFlow: newFlow,
     });
   });
 }
@@ -115,16 +131,18 @@ function onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<I
   });
 }
 
-function onGetStepID(location: IURLLocation, params: IURLParams, flow: IFlow): Promise<string> {
-  return new Promise<string>((resolve) => {
-    resolve(params.stepID);
-  });
+async function onGetStepID(location: IURLLocation, params: IURLParams, flow: IFlow): Promise<string> {
+  if (flow) {
+    return resolveUrlStepId(flow, params.stepID);
+  }
+  return params.stepID || '';
 }
 
 export {
   onCreateFlow,
   onLoadFlow,
   onLoadFlowList,
+  onEditFlow,
   onAutoSaveFlow,
   onUserSaveFlow,
   onRunnerLoadFlow,

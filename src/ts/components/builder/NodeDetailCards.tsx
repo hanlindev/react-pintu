@@ -1,20 +1,22 @@
+import * as _ from 'lodash';
 import * as React from 'react';
 import * as Props from 'prop-types';
 import * as cx from 'classnames';
 import * as CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import {CSSProperties} from 'react';
-import {Card, CardActions, CardHeader} from 'material-ui/Card';
-import FlatButton from 'material-ui/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
+import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
+import {FlatButton, RaisedButton, TextField} from 'material-ui';
 
 import {BaseNodeDetailCard} from './BaseNodeDetailCard';
 import {ActionPayloadNodeDetailCard} from './ActionPayloadNodeDetailCard';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ScrollableArea} from '../ui/ScrollableArea';
 import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine} from '../../lib';
-import {RemoveModel} from '../../lib/FlowEngine/diagramTriggers';
+import {findStepIdOverrideError} from '../../lib/utils';
+import {RemoveModel, ChangeNodeConfigField} from '../../lib/FlowEngine/diagramTriggers';
 import {BaseContainer} from '../../lib/BaseContainer';
 import {ActionPayloadMultiplexer} from '../../lib/containers';
+import {IFlow} from '../../lib/interfaces';
 
 import '../../../scss/builder/node-detail-cards.scss';
 
@@ -22,6 +24,7 @@ const BORDER = '1px solid rgba(0, 0, 0, 0.4)';
 
 interface INodeDetailCardsProps {
   node: NodeModel | null;
+  flow: IFlow;
   flowEngine: FlowEngine;
 }
 
@@ -31,6 +34,8 @@ interface IContext {
 
 interface IState {
   detailExpanded: boolean;
+  stepIdOverride: string;
+  stepIdOverrideError: string | null;
 }
 
 export class NodeDetailCards extends React.Component<INodeDetailCardsProps, IState> {
@@ -39,9 +44,21 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
   };
 
   context: IContext;
-  state: IState = {
-    detailExpanded: true,
-  };
+  state: IState;
+
+  constructor(props: INodeDetailCardsProps) {
+    super(props);
+    let stepIdOverride = '';
+    const {
+      node,
+      flow,
+    } = props;
+    this.state = {
+      detailExpanded: true,
+      stepIdOverride: '',
+      stepIdOverrideError: null,
+    };
+  }
 
   private getRootStyle(): CSSProperties {
     return {
@@ -50,6 +67,17 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
       height: '100%',
       userSelect: 'none',
     };
+  }
+
+  componentDidUpdate(prevProps: INodeDetailCardsProps) {
+    const {node} = this.props;
+    const prevNode = prevProps.node;
+    if (node && prevNode !== node) {
+      this.setState({
+        stepIdOverride: node.config.urlIdOverride || '',
+        stepIdOverrideError: null,
+      });
+    }
   }
 
   render() {
@@ -95,7 +123,14 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
   }
 
   private renderMetaCard(node: NodeModel) {
-    const {flowEngine} = this.props;
+    const {
+      flow,
+      flowEngine,
+    } = this.props;
+    const {
+      stepIdOverride,
+      stepIdOverrideError,
+    } = this.state;
     const {config} = node;
     const container = this.context.registry.getContainer(config.containerName);
     const engine = flowEngine.getDiagramEngine();
@@ -120,7 +155,7 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
         <span>
           {config.containerName}
         </span>
-      </div>
+      </div>;
     const metaSubtitle =
       <div>
         Step ID: {config.id}
@@ -131,6 +166,22 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
           title={metaTitle}
           subtitle={metaSubtitle}
         />
+        <CardText
+          style={{
+            paddingTop: 0,
+          }}
+        >
+          <TextField
+            errorText={stepIdOverrideError}
+            floatingLabelText="Step ID Override"
+            hintText="A URL compatible string"
+            value={stepIdOverride}
+            onChange={(e, newValue) => {
+              this.onStepIdOverrideChange(flow, node, newValue);
+            }}
+            onKeyUp={(e) => e.stopPropagation()}
+          />
+        </CardText>
         <CardActions>
           <RaisedButton
             primary
@@ -150,6 +201,23 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
         </CardActions>
       </Card>
     );
+  }
+
+  private onStepIdOverrideChange(
+    flow: IFlow, 
+    node: NodeModel, 
+    newValue: string,
+  ) {
+    this.setState({
+      stepIdOverride: newValue,
+      stepIdOverrideError: findStepIdOverrideError(flow, newValue),
+    }, () => {
+      if (!this.state.stepIdOverrideError) {
+        const trigger = 
+          new ChangeNodeConfigField(node, 'urlIdOverride', newValue);
+        trigger.trigger(this.props.flowEngine.getDiagramEngine());
+      }
+    });
   }
 
   private renderContainerType(container: BaseContainer) {

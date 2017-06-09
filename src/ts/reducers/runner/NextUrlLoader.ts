@@ -18,13 +18,14 @@ export class NextStepNavigator {
       id,
       containerName,
       inputSources,
+      urlIdOverride,
     } = this.nextStepConfig;
     const {pathTemplate} = this.registry.getContainerSpec(containerName);
     const inputs = this.getInputs(containerName, inputSources);
     const containerPath = fillString(pathTemplate, inputs);
     const finalPath = fillString(this.runnerUrlTemplate, {
       containerPathTemplate: containerPath,
-      stepID: id,
+      stepID: urlIdOverride || id,
     });
 
     return finalPath;

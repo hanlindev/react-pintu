@@ -21,7 +21,11 @@ export class ChangeConstantInputSource extends BaseTrigger {
     } = this;
 
     const config = node.config;
-    config.inputSources[inputName] = sourceSpec;
+    if (!sourceSpec.value && config.inputSources[inputName]) {
+      delete config.inputSources[inputName];
+    } else {
+      config.inputSources[inputName] = sourceSpec;
+    }
     node.setConfig(config);
   }
 }

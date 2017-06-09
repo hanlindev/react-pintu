@@ -98,9 +98,10 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
             containerPathTemplate: spec.pathTemplate,
           },
         );
+
         return (
           <Route 
-            key={name}
+            key={`container-${name}`}
             path={path} 
             component={createRunner(
               spec, 

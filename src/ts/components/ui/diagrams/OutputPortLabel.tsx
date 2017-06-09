@@ -1,11 +1,13 @@
 import * as React from 'react';
 
+import {NodeModel} from './NodeModel';
 import {PortWidget} from './PortWidget';
 import {InputPortModel} from './InputPortModel';
 import {ThemeableComponent} from '../ThemeableComponent';
 import {UseType} from './common';
 
 export interface IOutputPortLabelProps {
+  parentNode: NodeModel;
   model: InputPortModel;
   style?: React.CSSProperties;
   use?: UseType;
@@ -28,7 +30,7 @@ export class OutputPortLabel extends ThemeableComponent<IOutputPortLabelProps, v
   }
 
   render() {
-    const {model, use, ...others} = this.props;
+    const {model, use, parentNode, ...others} = this.props;
     const port = (
       <PortWidget 
         name={model.getName()} 

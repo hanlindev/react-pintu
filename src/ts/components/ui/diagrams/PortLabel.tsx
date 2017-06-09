@@ -12,6 +12,7 @@ import {OutputPortLabel} from './OutputPortLabel';
 import {UseType} from './common';
 
 export interface IPortLabelProps {
+  parentNode: NodeModel;
   style?: React.CSSProperties;
   model: InputPortModel | ActionPortModel | EntrancePortModel;
   use?: UseType;

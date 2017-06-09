@@ -16,10 +16,10 @@ class PintuSample extends React.Component<{}, void> {
         canUseBuilder={true}
         appWrapper={AppWrapper}
         containerRegistry={combinedRegistry}
-        homePath="/0/sample"
+        homePath="/sample/start"
         builderEventHandlers={SampleServerAPI}
         runnerEventHandlers={SampleServerAPI}
-        runnerUrlTemplate="/:stepID:containerPathTemplate"
+        runnerUrlTemplate=":containerPathTemplate/:stepID"
       />
     );
   }

@@ -52,6 +52,10 @@ export interface IStepConfig {
   sources: Array<ISourceSpec>,
   destinations: {[actionName: string]: IActionDestination};
   inputSources: IInputSourceMap;
+  // This value is only used to render a meaningful step ID in the URL.
+  // The destination, sources and input sources are still specified in the
+  // step configs. Default: empty string
+  urlIdOverride: string;
 }
 
 export interface IStepConfigMap {

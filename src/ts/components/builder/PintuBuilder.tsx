@@ -12,7 +12,7 @@ import {IState} from '../../reducers';
 import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
-import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap} from '../../lib';
+import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap, EditFlowCallbackType} from '../../lib';
 import {NodeDetailCards} from './NodeDetailCards';
 import {FlowList} from './FlowList';
 import {ContextPopover} from '../ui/ContextPopover';
@@ -43,6 +43,7 @@ export interface IPintuBuilderProps {
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
   onLoadFlowList: () => Promise<IFlowMetaDataMap>;
+  onEditFlow: EditFlowCallbackType;
   onAutoSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   onUserSaveFlow: (flowData: IFlow) => Promise<FlowSaveResultType>;
   params: IParams;
@@ -219,6 +220,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       registry,
       snackMessage,
       selectedNode,
+      onEditFlow,
     } = this.props;
     const {
       newNodeMenuPosition,
@@ -277,6 +279,7 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
         </div>
         <div style={this.getConfigurationTrayStyle()}>
           <NodeDetailCards 
+            flow={flowCanvas.flow}
             flowEngine={flowCanvas.flowEngine}
             node={selectedNode} 
           />

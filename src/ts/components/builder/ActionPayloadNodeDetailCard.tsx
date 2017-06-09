@@ -103,6 +103,7 @@ export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadN
             <InputPortLabel
               model={output}
               use="others"
+              parentNode={node}
             />
           </div>
           

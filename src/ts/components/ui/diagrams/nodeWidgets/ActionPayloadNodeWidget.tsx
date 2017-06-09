@@ -19,6 +19,7 @@ export class ActionPayloadNodeWidget extends BaseNodeWidget {
       <PortLabel
         key="entrance"
         model={node.getEntrancePortModel()}
+        parentNode={node}
       />
     ];
   }
@@ -52,6 +53,7 @@ export class ActionPayloadNodeWidget extends BaseNodeWidget {
           key={model.getID()} 
           model={model} 
           style={style}
+          parentNode={node}
         />
       );
     });
@@ -64,6 +66,7 @@ export class ActionPayloadNodeWidget extends BaseNodeWidget {
           style={{
             marginTop: small,
           }}
+          parentNode={node}
         />
       );
     }));
