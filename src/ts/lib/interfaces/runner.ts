@@ -13,10 +13,15 @@ export interface IStepPayloadMap {
   [stepID: string]: IActionPayloadMap;
 }
 
-export interface IURLLocation extends LocationShape {
+export interface IURLLocation {
+  action: string;
+  hash: string;
+  key: string;
+  pathname: string;
   query: {
     [name: string]: any;
   };
+  search: string;
 }
 
 export interface IURLParams {
@@ -25,5 +30,9 @@ export interface IURLParams {
 
 export interface IRunnerEventHandlers {
   onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<IFlow>;
-  onGetStepID(location: IURLLocation, params: IURLParams): Promise<string>;
+  onGetStepID(
+    location: IURLLocation, 
+    params: IURLParams, 
+    flow: IFlow,
+  ): Promise<string>;
 }

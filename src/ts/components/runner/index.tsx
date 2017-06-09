@@ -49,7 +49,7 @@ export function createRunner(
       }
       
       const newStepID = 
-        (await eventHandler.onGetStepID(location, params)) || flow.firstStepID;
+        (await eventHandler.onGetStepID(location, params, flow)) || flow.firstStepID;
       if (!stepConfig || stepConfig.id !== newStepID) {
         dispatch(actions.setStepID(newStepID));
       }

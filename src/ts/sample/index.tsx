@@ -4,10 +4,8 @@ import {AppWrapper} from './AppWrapper';
 import {IThemeCustomization} from '../components/ui';
 import {PintuProvider} from '../.';
 import {ContainerRegistry} from '../lib/ContainerRegistry';
-import {registry as builtInRegistry} from '../lib/containers';
-import {registry as viewRegistry} from './views';
-import {registry as logicRegistry} from './logics';
 import * as SampleServerAPI from './SampleServerAPI';
+import combinedRegistry from './CombinedRegistry';
 
 
 class PintuSample extends React.Component<{}, void> {
@@ -17,11 +15,7 @@ class PintuSample extends React.Component<{}, void> {
         builderUrlPrefix="/builder"
         canUseBuilder={true}
         appWrapper={AppWrapper}
-        containerRegistry={ContainerRegistry.combineRegistries(
-          viewRegistry,
-          logicRegistry,
-          builtInRegistry,
-        )}
+        containerRegistry={combinedRegistry}
         homePath="/0/sample"
         builderEventHandlers={SampleServerAPI}
         runnerEventHandlers={SampleServerAPI}

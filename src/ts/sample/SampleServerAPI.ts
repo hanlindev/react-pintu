@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import * as qs from 'qs';
-
 import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData} from '../.';
 
 const DefaultFlow: IFlow = {
@@ -116,7 +115,7 @@ function onRunnerLoadFlow(location: IURLLocation, params: IURLParams): Promise<I
   });
 }
 
-function onGetStepID(location: IURLLocation, params: IURLParams): Promise<string> {
+function onGetStepID(location: IURLLocation, params: IURLParams, flow: IFlow): Promise<string> {
   return new Promise<string>((resolve) => {
     resolve(params.stepID);
   });
