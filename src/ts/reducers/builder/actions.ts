@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import {Dispatch} from 'react-redux';
 import {FlowEngine} from '../../lib/FlowEngine';
-import {IFlow, IStepConfig, IStepConfigMapChange, IFlowMetaDataMap} from '../../lib/interfaces';
+import {IFlow, IStepConfig, IStepConfigMapChange, IFlowMetaDataMap, SaveFlowCallbackType, FlowSaveResultType} from '../../lib/interfaces';
 import {DiagramListener, IDiagramEvents} from '../../lib/FlowEngine/listeners/DiagramListener';
 import {IDiagramChange} from '../../lib/FlowEngine/interfaces';
 import {NodeModel} from '../../components/ui/diagrams/NodeModel';
@@ -25,6 +25,57 @@ export const actions = {
     return {
       type: common.SET_FLOW,
       newFlow,
+    };
+  },
+
+  setIsSavingFlow(isSavingFlow: boolean): BuilderActionType {
+    return {
+      type: common.SET_IS_SAVING_FLOW,
+      isSavingFlow,
+    };
+  },
+
+  saveFlow(newFlow: IFlow, saveFlowCallback: SaveFlowCallbackType) {
+    return async (dispatch: Dispatch<BuilderActionType>) => {
+      dispatch(actions.setIsSavingFlow(true));
+      const saveResult = await saveFlowCallback(newFlow);
+      dispatch(actions.setIsSavingFlow(false));
+
+      switch (saveResult.type) {
+        case 'error':
+          dispatch(actions.setSnackMessage(saveResult.message));
+          break;
+        case 'delay':
+          saveResult.onStartSaving(() => {
+            dispatch(actions.setIsSavingFlow(true));
+          });
+          saveResult.onFinishSaving((result: FlowSaveResultType) => {
+            dispatch(actions.setIsSavingFlow(false));
+            switch (result.type) {
+              case 'success':
+                dispatch(actions.setSnackMessage('Flow data saved'));
+                break;
+              case 'error':
+                dispatch(actions.setSnackMessage(result.message));
+                break;
+            }
+          });
+          break;
+      }
+    };
+  },
+
+  updateCurrentFlow(
+    newFlow: IFlow, 
+    saveFlowCallback: SaveFlowCallbackType,
+  ) {
+    if (newFlow.id !== currentFlow.id) {
+      throw new TypeError('Unable to update non-loaded flow');
+    }
+
+    return async (dispatch: Dispatch<BuilderActionType>) => {
+      dispatch(actions.saveFlow(newFlow, saveFlowCallback));
+      dispatch(actions.setFlow(newFlow));
     };
   },
 

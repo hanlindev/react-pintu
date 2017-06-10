@@ -126,6 +126,7 @@ export class FlowList extends React.Component<IFlowListProps, IState> {
           label="Create"
           onClick={() => {
             onCreateFlow && onCreateFlow({
+              urlIdOverride: '',
               name,
               description,
             });

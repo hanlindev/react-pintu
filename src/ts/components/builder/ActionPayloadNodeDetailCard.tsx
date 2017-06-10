@@ -5,7 +5,7 @@ import FlatButton from 'material-ui/FlatButton';
 import {CommonNodeDetail} from './CommonNodeDetail';
 import {ActionPortModel, NodeModel, InputPortLabel, InputPortModel, OutputPortModel} from '../ui/diagrams';
 import {MiddleEmptyRow as Row} from '../ui/MiddleEmptyRow';
-import {FlowEngine} from '../../lib/FlowEngine';
+import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 import {SelectModel} from '../../lib/FlowEngine/diagramTriggers';
 import {style} from '../../lib/styles';
 
@@ -17,7 +17,7 @@ interface IActionPayloadNodeDetailCardProps {
   style?: React.CSSProperties;
   expanded?: boolean;
   onExpandChange?: (expanded: boolean) => any;
-  flowEngine: FlowEngine;
+  flowEngine: IFlowEngine;
 }
 
 export class ActionPayloadNodeDetailCard extends React.Component<IActionPayloadNodeDetailCardProps, void> {

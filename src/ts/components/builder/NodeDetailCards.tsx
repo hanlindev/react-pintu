@@ -1,73 +1,32 @@
-import * as _ from 'lodash';
 import * as React from 'react';
-import * as Props from 'prop-types';
-import * as cx from 'classnames';
-import * as CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
-import {CSSProperties} from 'react';
-import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
-import {FlatButton, RaisedButton, TextField} from 'material-ui';
+import {FlatButton, RaisedButton, Card, CardHeader, CardText, CardActions, TextField} from 'material-ui';
 
-import {BaseNodeDetailCard} from './BaseNodeDetailCard';
 import {ActionPayloadNodeDetailCard} from './ActionPayloadNodeDetailCard';
-import {NodeModel} from '../ui/diagrams/NodeModel';
-import {ScrollableArea} from '../ui/ScrollableArea';
-import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine} from '../../lib';
-import {findStepIdOverrideError} from '../../lib/utils';
+import {BaseNodeDetailCard} from './BaseNodeDetailCard';
+import {NodeModel} from '../ui/diagrams';
+import {ThemeableComponent} from '../ui/ThemeableComponent';
+import {IFlow, cssConstant, findStepIdOverrideError, BaseContainer, ActionPayloadMultiplexer, UIContainer} from '../../lib';
+import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 import {RemoveModel, ChangeNodeConfigField} from '../../lib/FlowEngine/diagramTriggers';
-import {BaseContainer} from '../../lib/BaseContainer';
-import {ActionPayloadMultiplexer} from '../../lib/containers';
-import {IFlow} from '../../lib/interfaces';
-
-import '../../../scss/builder/node-detail-cards.scss';
-
-const BORDER = '1px solid rgba(0, 0, 0, 0.4)';
 
 interface INodeDetailCardsProps {
-  node: NodeModel | null;
-  flow: IFlow;
-  flowEngine: FlowEngine;
-}
-
-interface IContext {
-  registry: ContainerRegistry;
+  flow: IFlow,
+  node: NodeModel;
+  flowEngine: IFlowEngine;
+  detailExpanded: boolean;
+  onDetailExpansionChange: (expanded: boolean) => any;
 }
 
 interface IState {
-  detailExpanded: boolean;
   stepIdOverride: string;
   stepIdOverrideError: string | null;
 }
 
-export class NodeDetailCards extends React.Component<INodeDetailCardsProps, IState> {
-  static contextTypes = {
-    registry: Props.object,
+export class NodeDetailCards extends ThemeableComponent<INodeDetailCardsProps, IState> {
+  state: IState = {
+    stepIdOverride: '',
+    stepIdOverrideError: null,
   };
-
-  context: IContext;
-  state: IState;
-
-  constructor(props: INodeDetailCardsProps) {
-    super(props);
-    let stepIdOverride = '';
-    const {
-      node,
-      flow,
-    } = props;
-    this.state = {
-      detailExpanded: true,
-      stepIdOverride: '',
-      stepIdOverrideError: null,
-    };
-  }
-
-  private getRootStyle(): CSSProperties {
-    return {
-      boxSizing: 'border-box',
-      width: '100%',
-      height: '100%',
-      userSelect: 'none',
-    };
-  }
 
   componentDidUpdate(prevProps: INodeDetailCardsProps) {
     const {node} = this.props;
@@ -80,52 +39,21 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
     }
   }
 
+
   render() {
     return (
-      <div
-        className={cx('node-detail-cards')}
-        style={this.getRootStyle()}
-      >
-        <CSSTransitionGroup
-          transitionName="root"
-          transitionEnterTimeout={250}
-          transitionLeaveTimeout={150}
-        >
-          {this.renderRoot()}
-        </CSSTransitionGroup>
+      <div>
+        {this.renderMetaCard()}
+        {this.renderDetailCard()}
       </div>
     );
   }
 
-  private renderRoot() {
-    const {node} = this.props;
-    
-    if (!node) {
-      return null;
-    }
-
-    return (
-      <ScrollableArea 
-        key="node-detail-card-root" 
-        style={this.getRootStyle()}
-        height="100%"
-      >
-        <div
-          style={{
-            pointerEvents: 'all',
-          }}
-        >
-          {this.renderMetaCard(node)}
-          {this.renderDetailCard(node)}
-        </div>
-      </ScrollableArea>
-    );
-  }
-
-  private renderMetaCard(node: NodeModel) {
+  private renderMetaCard() {
     const {
       flow,
       flowEngine,
+      node,
     } = this.props;
     const {
       stepIdOverride,
@@ -143,7 +71,7 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
       >
         <span 
           style={{
-            border: BORDER,
+            border: cssConstant('border'),
               padding: 1,
               fontSize: 9,
             verticalAlign: 'middle',
@@ -230,10 +158,12 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
     }
   }
 
-  private renderDetailCard(node: NodeModel) {
+  private renderDetailCard() {
     const {
       detailExpanded,
-    } = this.state;
+      onDetailExpansionChange,
+      node,
+    } = this.props;
     const {
       registry,
     } = this.context;
@@ -248,7 +178,7 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
             marginTop: 4,
           }}
           onExpandChange={(e) => {
-            this.setState({detailExpanded: e});
+            onDetailExpansionChange && onDetailExpansionChange(e);
           }}
           flowEngine={this.props.flowEngine}
         />
@@ -261,8 +191,8 @@ export class NodeDetailCards extends React.Component<INodeDetailCardsProps, ISta
           style={{
             marginTop: 4,
           }}
-          onExpandChange={(e) => {
-            this.setState({detailExpanded: e});
+          onExpandChange={(e: boolean) => {
+            onDetailExpansionChange && onDetailExpansionChange(e);
           }}
           flowEngine={this.props.flowEngine}
         />

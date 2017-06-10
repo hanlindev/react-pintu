@@ -1,5 +1,6 @@
 const CssConstants: {[key: string]: number | string} = {
   black: '#000000',
+  border: '1px solid rgba(0, 0, 0, 0.4)',
   'grey-50': '#FAFAFA',
 };
 

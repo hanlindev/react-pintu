@@ -33,7 +33,7 @@ export class NodeListener implements INodeModelListeners {
 
   selectionChanged = (item: NodeModel, isSelected: boolean) => {
     let selectedNode = null;
-    if (isSelected && (this.previouslySelected || this.isDoubleClick())) {
+    if (isSelected) {
       this.previouslySelected = true;
       selectedNode = item;
     } else {

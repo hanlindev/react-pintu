@@ -6,7 +6,7 @@ import {CommonNodeDetail} from './CommonNodeDetail';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {PortLabel} from '../ui/diagrams/PortLabel';
 import {InputPortModel} from '../ui/diagrams/InputPortModel';
-import {FlowEngine} from '../../lib';
+import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 
 import {MiddleEmptyRow as Row} from '../ui/MiddleEmptyRow';
 
@@ -15,7 +15,7 @@ interface IBaseNodeDetailCardProps {
   style?: React.CSSProperties;
   expanded?: boolean;
   onExpandChange?: (expanded: boolean) => any;
-  flowEngine: FlowEngine;
+  flowEngine: IFlowEngine;
 }
 
 export class BaseNodeDetailCard extends React.Component<IBaseNodeDetailCardProps, void> {

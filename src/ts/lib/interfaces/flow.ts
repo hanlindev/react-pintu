@@ -41,6 +41,7 @@ export interface ILinkSource {
 }
 
 export interface IFlowMetaData {
+  urlIdOverride: string;
   description: string;
   name: string;
 }

@@ -1,3 +1,4 @@
+export * from './BaseContainer'
 export * from './ContainerRegistry';
 export * from './containers';
 export * from './FlowEngine';

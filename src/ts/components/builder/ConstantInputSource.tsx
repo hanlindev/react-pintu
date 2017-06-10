@@ -2,11 +2,11 @@ import * as React from 'react';
 import TextField from 'material-ui/TextField';
 import {IConstantInputSource} from '../../lib/interfaces';
 import {InputPortModel, NodeModel} from '../ui/diagrams';
-import {FlowEngine} from '../../lib';
+import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 import {ChangeConstantInputSource} from '../../lib/FlowEngine/diagramTriggers';
 
 interface IConstantInputSourceProps {
-  flowEngine: FlowEngine;
+  flowEngine: IFlowEngine;
   sourceSpec?: IConstantInputSource;
   inputName: string;
   input: InputPortModel;

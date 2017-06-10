@@ -13,7 +13,7 @@ import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
 import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap, EditFlowCallbackType} from '../../lib';
-import {NodeDetailCards} from './NodeDetailCards';
+import {ConfigTray} from './ConfigTray';
 import {FlowList} from './FlowList';
 import {ContextPopover} from '../ui/ContextPopover';
 import {NodeModel} from '../ui/diagrams/NodeModel';
@@ -40,6 +40,7 @@ export interface IPintuBuilderProps {
   dispatch: Dispatch<BuilderActionType>;
   flowCanvas?: IFlowCanvas;
   flowList: IFlowMetaDataMap;
+  isSavingFlow: boolean;
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
   onLoadFlowList: () => Promise<IFlowMetaDataMap>;
@@ -216,11 +217,13 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     const {
       dispatch,
       flowCanvas,
+      isSavingFlow,
       params,
       registry,
       snackMessage,
       selectedNode,
       onEditFlow,
+      onAutoSaveFlow,
     } = this.props;
     const {
       newNodeMenuPosition,
@@ -278,10 +281,13 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
           />
         </div>
         <div style={this.getConfigurationTrayStyle()}>
-          <NodeDetailCards 
+          <ConfigTray 
+            dispatch={dispatch}
             flow={flowCanvas.flow}
             flowEngine={flowCanvas.flowEngine}
             node={selectedNode} 
+            saveFlowCallback={onAutoSaveFlow}
+            isSavingFlow={isSavingFlow}
           />
         </div>
         <Snackbar
@@ -367,6 +373,7 @@ export function createBuilder(
       snackMessage: state.builder.snackMessage,
       selectedNode: state.builder.selectedNode,
       builderUrlPrefix,
+      isSavingFlow: state.builder.isSavingFlow,
     };
   })(PintuBuilder);
 }

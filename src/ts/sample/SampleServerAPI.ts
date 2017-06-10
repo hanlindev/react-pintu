@@ -5,6 +5,7 @@ import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlo
 const DefaultFlow: IFlow = {
   id: '1',
   metaData: {
+    urlIdOverride: '',
     description: 'Dummy Flow 1',
     name: 'Dummy Flow 1',
   },
@@ -99,15 +100,47 @@ async function onEditFlow<TK extends keyof IFlow>(
   return await onAutoSaveFlow(newFlow);
 }
 
+let saveFlowTimeout: number | null;
+let lastSaveResult: FlowSaveResultType | null = null;
+let startCallback: (() => any) | null;
+let finishCallback: ((result: FlowSaveResultType) => any) | null;
+function startDelayedSavingRegister(cb: () => any) {
+  if (saveFlowTimeout) {
+    cb();
+  }
+  startCallback = cb;
+}
+
+function finishDelayedSavingRegister(cb: (result: FlowSaveResultType) => any) {
+  if (lastSaveResult) {
+    cb(lastSaveResult);
+  }
+  finishCallback = cb;
+}
+
 function onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType> {  
   return new Promise<FlowSaveResultType>((resolve) => {
-    const savedFlows = getSavedFlows();
-    savedFlows.flows[newFlow.id] = newFlow;
-    localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
+    lastSaveResult = null;
+    startCallback = null;
+    finishCallback = null;
+    saveFlowTimeout && clearTimeout(saveFlowTimeout);
+    saveFlowTimeout = null;
     resolve({
-      type: 'success',
-      savedFlow: newFlow,
+      type: 'delay',
+      timeout: 5,
+      onStartSaving: startDelayedSavingRegister,
+      onFinishSaving: finishDelayedSavingRegister,
     });
+    saveFlowTimeout = setTimeout(
+      () => {
+        startCallback && startCallback();
+        const savedFlows = getSavedFlows();
+        savedFlows.flows[newFlow.id] = newFlow;
+        localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
+        finishCallback && finishCallback({type: 'success', savedFlow: newFlow});
+      },
+      2000,
+    );
   });
 }
 

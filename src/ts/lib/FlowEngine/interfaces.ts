@@ -5,10 +5,13 @@ import {WireablePortType} from '../../components/ui/diagrams';
 import {BaseContainer} from '../BaseContainer';
 
 export interface IFlowEngine {
+  clearLinks(port: PortModel, exceptIds: Array<string>): void;
+  getFirstLink(port: PortModel): LinkModel | null;
   // Get the reference of the node model so the link change
   // event can modify the data.
   getNodeRef(stepID: string): NodeModel;
   getNodeRef(port: PortModel): NodeModel;
+  getOnlyLink(port: PortModel): LinkModel | null;
   hasNode(stepID: string): boolean;
   hasNode(port: PortModel): boolean;
   repaintCanvas(): void;

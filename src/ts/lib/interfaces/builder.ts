@@ -5,6 +5,8 @@ export type FlowSaveResultType =
   // The save operation will be performed after timeout.
   type: 'delay',
   timeout: number,
+  onStartSaving: (cb: () => any) => any,
+  onFinishSaving: (cb: (result: FlowSaveResultType) => any) => any,
 }
 | {
   // The save operation failed. Message is mandatory.
@@ -34,6 +36,8 @@ export type EditFlowCallbackType = <TK extends keyof IFlow> (
   newFields: Pick<IFlow, TK>,
 ) => Promise<FlowSaveResultType>;
 
+export type SaveFlowCallbackType = (flow: IFlow) => Promise<FlowSaveResultType>;
+
 export interface IBuilderEventHandlers {
   // Given flow meta data, return a promise that resolves to the ID of the new
   // flow.
@@ -44,7 +48,7 @@ export interface IBuilderEventHandlers {
   // Load a map of flowID -> flow meta data.
   onLoadFlowList(): Promise<IFlowMetaDataMap>;
   // Notify the app to auto-save the new flow. 
-  onAutoSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType>;
+  onAutoSaveFlow: SaveFlowCallbackType;
   // Notify the app of user-initiated flow save.
-  onUserSaveFlow(newFlow: IFlow): Promise<FlowSaveResultType>;
+  onUserSaveFlow: SaveFlowCallbackType;
 }

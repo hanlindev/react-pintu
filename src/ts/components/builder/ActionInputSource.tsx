@@ -3,7 +3,7 @@ import * as React from 'react';
 import FlatButton from 'material-ui/FlatButton';
 
 import {InputPortModel} from '../ui/diagrams/InputPortModel';
-import {FlowEngine} from '../../lib';
+import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 import {style} from '../../lib/styles';
 import {IActionInputSource} from '../../lib/interfaces';
 import {SelectModel, RemoveModel} from '../../lib/FlowEngine/diagramTriggers';
@@ -16,7 +16,7 @@ const GO_TO_NODE_WIDTH = ROW_WIDTH - MAKE_CONSTANT_WIDTH - GAP;
 interface IActionInputSourceProps {
   inputPort: InputPortModel;
   sourceSpec: IActionInputSource;
-  flowEngine: FlowEngine;
+  flowEngine: IFlowEngine;
 }
 
 export class ActionInputSource extends React.Component<IActionInputSourceProps, void> {

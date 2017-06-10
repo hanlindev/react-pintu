@@ -57,13 +57,14 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: [/node_modules/, /test/, /typings/],
+        enforce: 'pre',
         use: [
           {
             loader: 'babel-loader'
           },
           {
             loader: 'ts-loader'
-          }
+          },
         ]
       }
     ]
