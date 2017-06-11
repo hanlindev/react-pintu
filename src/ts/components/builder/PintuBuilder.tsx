@@ -6,13 +6,14 @@ import {push} from 'react-router-redux';
 import {DiagramEngine, DiagramModel, DiagramWidget, LinkModel} from 'storm-react-diagrams';
 import CircularProgress from 'material-ui/CircularProgress';
 import Snackbar from 'material-ui/Snackbar';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {ScrollableArea} from '../ui/ScrollableArea';
 
 import {IState} from '../../reducers';
 import {actions, getDiagramEngine} from '../../reducers/builder/actions';
 import {BuilderActionType} from '../../reducers/builder/common';
 
-import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap, EditFlowCallbackType} from '../../lib';
+import {ContainerRegistry, FlowEngine, IFlow, FlowSaveResultType, IBuilderEventHandlers, IStepConfig, IFlowMetaData, IFlowMetaDataMap, EditFlowCallbackType, DeleteFlowCallbackType} from '../../lib';
 import {ConfigTray} from './ConfigTray';
 import {FlowList} from './FlowList';
 import {ContextPopover} from '../ui/ContextPopover';
@@ -37,11 +38,13 @@ interface IFlowCanvas {
 
 export interface IPintuBuilderProps {
   builderUrlPrefix: string;
+  runnerUrlTemplate: string;
   dispatch: Dispatch<BuilderActionType>;
   flowCanvas?: IFlowCanvas;
   flowList: IFlowMetaDataMap;
   isSavingFlow: boolean;
   onCreateFlow: (flowData: IFlowMetaData) => Promise<string>;
+  onDeleteFlow: DeleteFlowCallbackType;
   onLoadFlow: (flowID: string) => Promise<IFlow>;
   onLoadFlowList: () => Promise<IFlowMetaDataMap>;
   onEditFlow: EditFlowCallbackType;
@@ -122,6 +125,12 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
     this.loadFlowList();
     if (flowID) {
       this.loadFlowData(flowID);
+    }
+  }
+
+  componentDidUpdate(prevProps: IPintuBuilderProps) {
+    if (prevProps.params.flowID && !this.props.params.flowID) {
+      this.loadFlowList();
     }
   }
 
@@ -220,10 +229,13 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       isSavingFlow,
       params,
       registry,
+      builderUrlPrefix,
+      runnerUrlTemplate,
       snackMessage,
       selectedNode,
       onEditFlow,
       onAutoSaveFlow,
+      onDeleteFlow,
     } = this.props;
     const {
       newNodeMenuPosition,
@@ -253,50 +265,55 @@ class PintuBuilder extends React.Component<IPintuBuilderProps, IPintuBuilderStat
       'is-moving-canvas': this.state.isMovingCanvas,
     });
     return (
-      <div
-        className={rootClass}
-        style={this.getRootStyle()}
-      >
-        <div 
-          onContextMenu={(e) => this.onRightClickCanvas(e)}
-          onClick={() => this.dismissNewNodeMenu()}
-          onMouseDown={(e) => this.onMouseDownCanvas(e)}
-          onMouseUp={(e) => this.onMouseUpCanvas(e)}
-          style={this.getCanvasStyle()}
+      <MuiThemeProvider>
+        <div
+          className={rootClass}
+          style={this.getRootStyle()}
         >
-          <ContextPopover
-              show={true}
-              position={newNodeMenuPosition}
-            >
-            <ContainerSelector 
-              registry={registry}
-              flow={flowCanvas.flow}
-              engine={flowCanvas.diagramEngine}
-              newNodePosition={newNodeMenuPosition}
-              onRequestClose={() => this.dismissNewNodeMenu()}
+          <div 
+            onContextMenu={(e) => this.onRightClickCanvas(e)}
+            onClick={() => this.dismissNewNodeMenu()}
+            onMouseDown={(e) => this.onMouseDownCanvas(e)}
+            onMouseUp={(e) => this.onMouseUpCanvas(e)}
+            style={this.getCanvasStyle()}
+          >
+            <ContextPopover
+                show={true}
+                position={newNodeMenuPosition}
+              >
+              <ContainerSelector 
+                registry={registry}
+                flow={flowCanvas.flow}
+                engine={flowCanvas.diagramEngine}
+                newNodePosition={newNodeMenuPosition}
+                onRequestClose={() => this.dismissNewNodeMenu()}
+              />
+            </ContextPopover>
+            <DiagramWidget
+              diagramEngine={flowCanvas.diagramEngine} 
             />
-          </ContextPopover>
-          <DiagramWidget
-            diagramEngine={flowCanvas.diagramEngine} 
+          </div>
+          <div style={this.getConfigurationTrayStyle()}>
+            <ConfigTray 
+              builderUrlPrefix={builderUrlPrefix}
+              dispatch={dispatch}
+              flow={flowCanvas.flow}
+              flowEngine={flowCanvas.flowEngine}
+              node={selectedNode} 
+              saveFlowCallback={onAutoSaveFlow}
+              deleteFlowCallback={onDeleteFlow}
+              isSavingFlow={isSavingFlow}
+              runnerUrlTemplate={runnerUrlTemplate}
+            />
+          </div>
+          <Snackbar
+            open={!!snackMessage}
+            message={snackMessage || ''}
+            autoHideDuration={4000}
+            onRequestClose={() => dispatch(actions.setSnackMessage(null))}
           />
         </div>
-        <div style={this.getConfigurationTrayStyle()}>
-          <ConfigTray 
-            dispatch={dispatch}
-            flow={flowCanvas.flow}
-            flowEngine={flowCanvas.flowEngine}
-            node={selectedNode} 
-            saveFlowCallback={onAutoSaveFlow}
-            isSavingFlow={isSavingFlow}
-          />
-        </div>
-        <Snackbar
-          open={!!snackMessage}
-          message={snackMessage || ''}
-          autoHideDuration={4000}
-          onRequestClose={() => dispatch(actions.setSnackMessage(null))}
-        />
-      </div>
+      </MuiThemeProvider>
     );
   }
 
@@ -349,6 +366,7 @@ export function createBuilder(
   eventHandlers: IBuilderEventHandlers,
   registry: ContainerRegistry,
   builderUrlPrefix: string,
+  runnerUrlTemplate: string,
 ) {
   FlowEngine.setRegistry(registry);
   return connect((state: IState) => {
@@ -374,6 +392,7 @@ export function createBuilder(
       selectedNode: state.builder.selectedNode,
       builderUrlPrefix,
       isSavingFlow: state.builder.isSavingFlow,
+      runnerUrlTemplate,
     };
   })(PintuBuilder);
 }

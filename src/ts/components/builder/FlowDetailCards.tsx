@@ -4,16 +4,21 @@ import {Card, CardHeader, CardText, CardActions, RaisedButton, FlatButton, TextF
 import {ThemeableComponent} from '../ui/ThemeableComponent';
 import {BuilderActionType} from '../../reducers/builder/common';
 import {actions} from '../../reducers/builder/actions';
-import {IFlow, IFlowMetaData, SaveFlowCallbackType} from '../../lib/interfaces';
+import {history} from '../../lib/History';
+import {getPathTo} from '../../lib/utils';
+import {IFlow, IFlowMetaData, SaveFlowCallbackType, DeleteFlowCallbackType} from '../../lib/interfaces';
 import {IFlowEngine} from '../../lib/FlowEngine/interfaces';
 import {SelectModel} from '../../lib/FlowEngine/diagramTriggers';
 import {MiddleEmptyRow as Row} from '../ui/MiddleEmptyRow';
 
 interface IFlowDetailCardsProps {
+  builderUrlPrefix: string;
   flow: IFlow;
   flowEngine: IFlowEngine;
   dispatch: Dispatch<BuilderActionType>;
+  runnerUrlTemplate: string;
   saveFlowCallback: SaveFlowCallbackType;
+  deleteFlowCallback: DeleteFlowCallbackType;
   isSavingFlow: boolean;
   metaExpanded: boolean;
   onMetaExpandsionChange: (expanded: boolean) => any;
@@ -165,7 +170,52 @@ export class FlowDetailCards extends ThemeableComponent<IFlowDetailCardsProps, v
             </div>
           </Row>
         </CardText>
+
+        <CardActions expandable={true}>
+          <RaisedButton
+            primary
+            label="Run Flow"
+            onClick={this.runFlow}
+          />
+          <FlatButton
+            secondary
+            label="Delete Flow"
+            onClick={this.deleteFlow}
+          />
+        </CardActions>
       </Card>
     );
   }
+
+  private runFlow = () => {
+    const {
+      flowEngine,
+      runnerUrlTemplate,
+      flow,
+      flow: {
+        id,
+        firstStepID,
+      }
+    } = this.props;
+    const path = getPathTo(
+      this.context.registry,
+      runnerUrlTemplate,
+      flow,
+      firstStepID,
+    );
+    history.push(path);
+  };
+
+  private deleteFlow = async () => {
+    const {
+      builderUrlPrefix,
+      flow,
+      deleteFlowCallback,
+    } = this.props;
+
+    const deleteResult = await deleteFlowCallback(flow.id);
+    if (deleteResult.type === 'success') {
+      history.replace(builderUrlPrefix);
+    }
+  };
 }

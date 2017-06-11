@@ -70,11 +70,13 @@ export class PintuProvider extends React.Component<IPintuProviderProps, void> {
       containerRegistry, 
       builderEventHandlers, 
       builderUrlPrefix,
+      runnerUrlTemplate,
     } = this.props;
     return createBuilder(
       builderEventHandlers, 
       containerRegistry,
       builderUrlPrefix as string,
+      runnerUrlTemplate as string,
     );
   }
 

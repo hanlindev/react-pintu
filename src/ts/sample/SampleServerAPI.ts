@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import * as qs from 'qs';
-import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData, resolveUrlStepId} from '../.';
+import {IFlowMetaData, IFlow, FlowSaveResultType, IURLLocation, IURLParams, IFlowMetaDataMap, IDefaultStepData, resolveUrlStepId, FlowDeleteResultType} from '../.';
 
 const DefaultFlow: IFlow = {
   id: '1',
@@ -68,6 +68,15 @@ function onCreateFlow(data: IFlowMetaData): Promise<string> {
     localStorage.setItem('savedFlows', JSON.stringify(newFlows));
     resolve(savedFlows.nextId.toString());
   });
+}
+
+async function onDeleteFlow(flowId: string): Promise<FlowDeleteResultType> {
+  const savedFlows = getSavedFlows();
+  delete savedFlows.flows[flowId];
+  localStorage.setItem('savedFlows', JSON.stringify(savedFlows));
+  return {
+    type: 'success',
+  }
 }
 
 function onLoadFlow(flowID: string): Promise<IFlow> {
@@ -173,6 +182,7 @@ async function onGetStepID(location: IURLLocation, params: IURLParams, flow: IFl
 
 export {
   onCreateFlow,
+  onDeleteFlow,
   onLoadFlow,
   onLoadFlowList,
   onEditFlow,

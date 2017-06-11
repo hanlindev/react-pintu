@@ -69,12 +69,6 @@ export class AppWrapper extends ThemeableComponent<any, void> {
               >
                 Builder
               </Link>
-              <Link
-                style={getNavLinkStyle()}
-                to="/"
-              >
-                Test
-              </Link>
             </div>
             <div
               style={{flex: 1}}

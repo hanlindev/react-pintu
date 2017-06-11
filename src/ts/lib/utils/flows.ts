@@ -1,5 +1,7 @@
 import * as _ from 'lodash';
+import {fillString} from './strings';
 import {IFlow, IStepConfig} from '../interfaces';
+import {ContainerRegistry} from '../ContainerRegistry';
 
 export function resolveUrlStepId(flow: IFlow, urlStepId: string): string {
   const {
@@ -46,4 +48,27 @@ export function findStepIdOverrideError(
   }
 
   return null;
+}
+
+/**
+ * Template params:
+ * :flowID
+ * :stepID 
+ * :containerPathTemplate
+ */
+export function getPathTo(
+  registry: ContainerRegistry,
+  pathTemplate: string,
+  flow: IFlow,
+  stepId: string, 
+  args: Object = {}
+) {
+  const step = flow.steps[stepId];
+  const container = registry.getContainerSpec(step.containerName);
+  const finalTemplate = fillString(pathTemplate, {
+    flowID: flow.id,
+    stepID: stepId,
+    containerPathTemplate: container.pathTemplate,
+  });
+  return fillString(finalTemplate, args);
 }

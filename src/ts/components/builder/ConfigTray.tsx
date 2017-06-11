@@ -15,7 +15,7 @@ import {NodeDetailCards} from './NodeDetailCards';
 import {NodeModel} from '../ui/diagrams/NodeModel';
 import {ScrollableArea} from '../ui/ScrollableArea';
 import {BuilderActionType} from '../../reducers/builder/common';
-import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine, SaveFlowCallbackType} from '../../lib';
+import {ContainerRegistry, LogicContainer, UIContainer, FlowEngine, SaveFlowCallbackType, DeleteFlowCallbackType} from '../../lib';
 import {findStepIdOverrideError} from '../../lib/utils';
 import {RemoveModel, ChangeNodeConfigField} from '../../lib/FlowEngine/diagramTriggers';
 import {BaseContainer} from '../../lib/BaseContainer';
@@ -25,12 +25,15 @@ import {IFlow} from '../../lib/interfaces';
 import '../../../scss/builder/config-tray.scss';
 
 interface IConfigTrayProps {
+  builderUrlPrefix: string;
   node: NodeModel | null;
   flow: IFlow;
   flowEngine: FlowEngine;
   dispatch: Dispatch<BuilderActionType>;
   saveFlowCallback: SaveFlowCallbackType;
+  deleteFlowCallback: DeleteFlowCallbackType;
   isSavingFlow: boolean;
+  runnerUrlTemplate: string;
 }
 
 interface IContext {
@@ -109,11 +112,14 @@ export class ConfigTray extends React.Component<IConfigTrayProps, IState> {
 
   private renderFlowDetailCards() {
     const {
+      builderUrlPrefix,
       flow, 
       flowEngine,
       dispatch, 
       saveFlowCallback,
+      deleteFlowCallback,
       isSavingFlow,
+      runnerUrlTemplate,
     } = this.props;
     const {
       flowMetaExpanded,
@@ -125,10 +131,12 @@ export class ConfigTray extends React.Component<IConfigTrayProps, IState> {
         }}
       >
         <FlowDetailCards 
+          builderUrlPrefix={builderUrlPrefix}
           dispatch={dispatch} 
           flow={flow} 
           flowEngine={flowEngine}
           saveFlowCallback={saveFlowCallback}
+          deleteFlowCallback={deleteFlowCallback}
           isSavingFlow={isSavingFlow}
           metaExpanded={flowMetaExpanded}
           onMetaExpandsionChange={(expanded: boolean) => {
@@ -136,6 +144,7 @@ export class ConfigTray extends React.Component<IConfigTrayProps, IState> {
               flowMetaExpanded: expanded,
             });
           }}
+          runnerUrlTemplate={runnerUrlTemplate}
         />
       </div>
     );
