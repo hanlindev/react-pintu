@@ -1,9 +1,13 @@
 {
   "name": "react-pintu",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A flow-based React application framework for everyone.",
   "main": "dist/index.js",
   "author": "Lin Han (hanlin.dev@gmail.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanlindev/react-pintu.git"
+  },
   "license": "MIT",
   "dependencies": {
     "@types/classnames": "^0.0.32",
