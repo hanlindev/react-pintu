@@ -6,11 +6,7 @@ import {UIContainer} from '../../lib/UIContainer';
 import * as Types from '../../lib/types';
 
 interface IInputs {
-  testString: string;
-  testArray?: Array<any>;
-  testObject?: Object;
-  testNumber?: number;
-  testBool?: boolean;
+  prevButton: string;
 }
 
 interface IProps {
@@ -22,15 +18,14 @@ class SampleViewComponent extends React.Component<IProps, void> {
   onTestAction(button: string) {
     const {onAction} = this.props;
     onAction('testAction', {
-      strArg: button,
-      numArg: 0,
+      buttonClicked: button,
     });
   }
 
   render() {
     const {
       inputs: {
-        testString,
+        prevButton,
       },
     } = this.props;
 
@@ -40,7 +35,7 @@ class SampleViewComponent extends React.Component<IProps, void> {
 
     return (
       <div>
-        {testString} was clicked
+        {prevButton} was clicked
         <Button 
           style={style} 
           use="confirm"
@@ -73,11 +68,7 @@ export class SampleView extends UIContainer<IInputs> {
       name: 'SampleView',
       pathTemplate: '/sample(/:testString)',
       inputs: {
-        testString: Types.string.isRequired,
-        testArray: Types.array,
-        typeObject: Types.object,
-        testNumber: Types.number,
-        testBool: Types.bool,
+        prevButton: Types.string.isRequired,
       },
       actions: {
         testAction: {
@@ -85,9 +76,8 @@ export class SampleView extends UIContainer<IInputs> {
           label: 'Test Action',
           type: 'endOfStep',
           payload: {
-            strArg: Types.string.isRequired,
-            numArg: Types.number.isRequired,
-          }
+            buttonClicked: Types.string.isRequired,
+          },
         },
       },
     };
