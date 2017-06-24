@@ -103,8 +103,22 @@ export class BranchLogic extends LogicContainer<void> {
 ```
 
 3. Connect application views and business logic using flow builder and run them.
-TODO demo gif.
+
+![workflow demo](https://raw.githubusercontent.com/hanlindev/Pintu/master/images/sample/demo.gif)
 
 ## Usage
 
-Please refer to the `sample` directory for the sample usage.
+Please refer to the `sample` directory for the sample usage.\
+
+## Roadmap to beta
+
+1. Support container composition.
+2. Layout editor and code generator
+3. Fix common bugs and errors.
+4. Make sample page stable and create a Github IO page.
+5. Productionalize.
+
+## Roadmap to release
+1. Add container and flow versioning support.
+2. Add package script or create a binary to help with version management.
+3. Release ready.
